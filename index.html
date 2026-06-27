@@ -1,0 +1,1742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#3A7BF7">
+<title>HealthPulse</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg: #F4F7FC;
+  --surface: #FFFFFF;
+  --surface2: #EEF3FA;
+  --border: #DDE5F0;
+  --text: #1A2233;
+  --text2: #5A6A82;
+  --text3: #8A9AB2;
+  --accent: #3A7BF7;
+  --accent2: #22C9A0;
+  --accent3: #F76A3A;
+  --accent4: #A259F7;
+  --red: #F74A4A;
+  --shadow: 0 2px 14px rgba(58,123,247,0.09);
+  --r: 16px;
+  --r-sm: 10px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html { font-size: 16px; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 72px; /* bottom nav height */
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ---- HEADER ---- */
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  box-shadow: 0 1px 8px rgba(58,123,247,0.07);
+}
+.logo { display: flex; align-items: center; gap: 8px; }
+.logo-icon {
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg,#3A7BF7,#22C9A0);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.logo-text { font-weight: 700; font-size: 16px; }
+.logo-text span { color: var(--accent); }
+.ai-badge {
+  background: #E8F0FE; color: var(--accent);
+  font-size: 10px; font-weight: 700;
+  padding: 3px 9px; border-radius: 20px; letter-spacing: 0.3px;
+}
+
+/* ---- BOTTOM NAV ---- */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 62px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  z-index: 200;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.07);
+}
+.bnav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  padding: 6px 2px 2px;
+  font-family: inherit;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+}
+.bnav-icon { font-size: 20px; line-height: 1; }
+.bnav-label { font-size: 9px; font-weight: 600; color: var(--text3); letter-spacing: 0.2px; }
+.bnav-item.active .bnav-label { color: var(--accent); }
+.bnav-item.active .bnav-icon { transform: translateY(-1px); }
+.bnav-item::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%; transform: translateX(-50%);
+  width: 0; height: 2.5px;
+  background: var(--accent);
+  border-radius: 0 0 4px 4px;
+  transition: width 0.2s;
+}
+.bnav-item.active::before { width: 28px; }
+
+/* ---- SECTIONS ---- */
+.section { display: none; padding: 14px 14px 6px; }
+.section.active { display: block; }
+
+/* ---- CARDS ---- */
+.card {
+  background: var(--surface);
+  border-radius: var(--r);
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+.card-hd {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+}
+.card-ic {
+  width: 38px; height: 38px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 19px; flex-shrink: 0;
+}
+.card-title { font-weight: 700; font-size: 15px; }
+.card-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+/* ---- HERO ---- */
+.hero {
+  background: linear-gradient(135deg,#3A7BF7,#22C9A0);
+  border-radius: var(--r);
+  padding: 18px 16px 16px;
+  margin-bottom: 12px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.hero::after {
+  content: '❤️';
+  position: absolute; right: -8px; top: -8px;
+  font-size: 80px; opacity: 0.12; pointer-events: none;
+}
+.hero h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.hero p { font-size: 12.5px; opacity: 0.9; line-height: 1.5; }
+.hero-stats {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px; margin-top: 14px;
+}
+.hero-stat {
+  background: rgba(255,255,255,0.18);
+  border-radius: 12px; padding: 9px 6px;
+  text-align: center;
+  backdrop-filter: blur(4px);
+}
+.hero-stat-num { font-size: 18px; font-weight: 700; }
+.hero-stat-lbl { font-size: 9.5px; opacity: 0.85; margin-top: 2px; }
+
+/* ---- 2-COL GRID ---- */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* ---- STAT MINI CARD ---- */
+.mini-card {
+  background: var(--surface2); border-radius: 12px; padding: 12px 10px;
+}
+.mini-lbl { font-size: 10.5px; color: var(--text2); margin-bottom: 4px; }
+.mini-val { font-size: 19px; font-weight: 700; }
+.mini-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 600; padding: 3px 8px;
+  border-radius: 8px; margin-top: 5px;
+}
+.bg-green { background:#E6FAF4; color:#1A8F68; }
+.bg-yellow { background:#FFF5E6; color:#D97706; }
+.bg-red { background:#FEE8E8; color:var(--red); }
+.bg-blue { background:#EEF3FA; color:var(--accent); }
+
+/* ---- REMINDER ITEM ---- */
+.rem-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; background: var(--surface2);
+  border-radius: 12px; margin-bottom: 8px;
+}
+.rem-item:last-child { margin-bottom: 0; }
+.rem-em { font-size: 18px; flex-shrink: 0; }
+.rem-txt { flex: 1; font-size: 13px; color: var(--text2); }
+.rem-status {
+  font-size: 10px; font-weight: 700; padding: 3px 8px;
+  border-radius: 8px; white-space: nowrap;
+}
+
+/* ---- INPUTS ---- */
+.lbl { font-size: 11px; font-weight: 700; color: var(--text2); letter-spacing: 0.4px; margin-bottom: 5px; }
+.inp {
+  width: 100%;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 11px 13px;
+  font-size: 16px; font-weight: 600;
+  color: var(--text);
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+}
+.inp:focus { border-color: var(--accent); background: #fff; }
+.inp-unit { font-size: 10.5px; color: var(--text3); margin-top: 3px; }
+
+.inp-group { margin-bottom: 12px; }
+.inp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.inp-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+/* ---- BUTTONS ---- */
+.btn {
+  width: 100%; padding: 13px;
+  border-radius: var(--r-sm);
+  font-size: 14px; font-weight: 700;
+  border: none; cursor: pointer;
+  font-family: inherit;
+  transition: transform 0.1s, opacity 0.1s;
+  letter-spacing: 0.2px;
+}
+.btn:active { transform: scale(0.97); opacity: 0.9; }
+.btn-primary {
+  background: linear-gradient(135deg,#3A7BF7,#6A9FF7);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(58,123,247,0.3);
+}
+.btn-green {
+  background: linear-gradient(135deg,#22C9A0,#17A882);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(34,201,160,0.3);
+}
+.btn-sm {
+  width: auto; padding: 10px 16px; font-size: 13px;
+}
+
+/* ---- RESULT BADGE ---- */
+.res-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 14px; border-radius: 20px;
+  font-size: 12.5px; font-weight: 600; margin-top: 10px;
+}
+
+/* ---- INFO BOX ---- */
+.info-box {
+  display: flex; gap: 9px; padding: 11px 13px;
+  border-radius: 11px; margin-bottom: 10px;
+  font-size: 12px; line-height: 1.55;
+  align-items: flex-start;
+}
+.info-box.blue { background:#EEF3FA; color:#1A4A8F; border-left:3px solid var(--accent); }
+.info-box.green { background:#E6FAF4; color:#0E6B49; border-left:3px solid var(--accent2); }
+.info-box.yellow { background:#FFF5E6; color:#8A5500; border-left:3px solid #F59E0B; }
+.info-box.red { background:#FEE8E8; color:#8A1515; border-left:3px solid var(--red); }
+.info-box-ic { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+/* ---- RANGE TABLE ---- */
+.rtable { width: 100%; border-collapse: collapse; font-size: 12px; }
+.rtable th {
+  background: var(--surface2); padding: 8px 10px;
+  text-align: left; font-size: 10.5px; color: var(--text2);
+  font-weight: 700; letter-spacing: 0.3px;
+}
+.rtable td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+.rtable tr:last-child td { border-bottom: none; }
+
+/* ---- STEPS ---- */
+.steps-big {
+  text-align: center; padding: 14px 0;
+}
+.steps-num {
+  font-size: 52px; font-weight: 800; line-height: 1;
+  background: linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.steps-lbl { color: var(--text2); font-size: 12px; margin-top: 4px; }
+.prog-bg {
+  height: 10px; background: var(--surface2);
+  border-radius: 5px; overflow: hidden; margin: 12px 0;
+}
+.prog-fill {
+  height: 100%; border-radius: 5px;
+  background: linear-gradient(90deg,var(--accent),var(--accent2));
+  transition: width 0.7s ease;
+}
+.prog-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--text2); }
+
+/* ---- WEEKLY BAR CHART ---- */
+.week-chart {
+  display: flex; gap: 6px; align-items: flex-end;
+  height: 90px; padding: 6px 0 0;
+}
+.wbar-wrap {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.wbar {
+  width: 100%; border-radius: 5px 5px 0 0;
+  min-height: 4px;
+}
+.wbar-lbl { font-size: 9px; color: var(--text3); }
+
+/* ---- SECTION TITLE ---- */
+.sec-title { font-size: 17px; font-weight: 800; margin-bottom: 12px; }
+.sec-title span { color: var(--accent); }
+
+/* ---- BMI SCALE ---- */
+.bmi-scale { display: flex; gap: 3px; border-radius: 6px; overflow: hidden; margin: 8px 0 2px; }
+.bmi-seg { flex: 1; height: 8px; }
+.bmi-labels { display: flex; justify-content: space-between; font-size: 9px; color: var(--text3); }
+
+/* ---- EXERCISE ---- */
+.filter-row {
+  display: flex; gap: 6px; overflow-x: auto;
+  scrollbar-width: none; padding-bottom: 2px; margin-bottom: 12px;
+}
+.filter-row::-webkit-scrollbar { display: none; }
+.f-btn {
+  flex-shrink: 0; padding: 6px 14px; border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+  background: var(--surface); border: 1.5px solid var(--border);
+  color: var(--text2); cursor: pointer; font-family: inherit;
+  transition: all 0.15s; white-space: nowrap;
+}
+.f-btn.active { background: var(--accent2); color: #fff; border-color: var(--accent2); }
+
+.ex-card {
+  background: var(--surface); border-radius: var(--r);
+  border: 1px solid var(--border); margin-bottom: 10px;
+  box-shadow: var(--shadow); overflow: hidden;
+}
+.ex-hd {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 14px; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ex-em {
+  width: 46px; height: 46px; border-radius: 13px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 24px;
+}
+.ex-meta { flex: 1; min-width: 0; }
+.ex-name { font-weight: 700; font-size: 14px; }
+.ex-tags { display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap; }
+.etag {
+  font-size: 9.5px; padding: 2px 8px; border-radius: 8px; font-weight: 700;
+}
+.tag-cardio { background:#FFE8E8; color:var(--red); }
+.tag-strength { background:#E8F0FE; color:var(--accent); }
+.tag-flex { background:#E8FAF4; color:#1A8F68; }
+.tag-balance { background:#F3E8FF; color:var(--accent4); }
+.tag-beg { background:#FFFDE8; color:#B45309; }
+.tag-mid { background:#FFF0E8; color:var(--accent3); }
+.ex-arrow { color: var(--text3); font-size: 16px; transition: transform 0.2s; flex-shrink: 0; }
+.ex-arrow.open { transform: rotate(180deg); }
+
+.ex-body { display: none; padding: 0 14px 14px; }
+.ex-body.open { display: block; }
+
+.ex-stats3 { display: grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:12px; }
+.exs { background:var(--surface2); border-radius:10px; padding:10px; text-align:center; }
+.exs-n { font-size:15px; font-weight:700; color:var(--accent); }
+.exs-l { font-size:10px; color:var(--text3); margin-top:2px; }
+
+.ex-desc { font-size: 12.5px; color: var(--text2); line-height: 1.6; margin-bottom: 11px; }
+
+.how-box { background:var(--surface2); border-radius:11px; padding:11px 13px; margin-bottom:10px; }
+.how-title { font-size:11px; font-weight:800; color:var(--accent); margin-bottom:8px; letter-spacing:0.4px; }
+.how-title.green { color: var(--accent2); }
+.how-list { list-style:none; display:flex; flex-direction:column; gap:7px; }
+.how-list li {
+  font-size: 12.5px; color: var(--text2);
+  padding-left: 22px; position: relative; line-height: 1.5;
+}
+.how-list li::before {
+  content: attr(data-n);
+  position: absolute; left: 0; top: 1px;
+  width: 16px; height: 16px;
+  background: var(--accent); color: #fff;
+  border-radius: 50%; font-size: 9px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.ben-list { display: flex; flex-direction: column; gap: 6px; }
+.ben-item {
+  display: flex; align-items: flex-start; gap: 7px;
+  font-size: 12.5px; color: var(--text2); line-height: 1.5;
+}
+.ben-ic { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+/* ---- AI CHAT ---- */
+.chat-wrap {
+  display: flex; flex-direction: column;
+  height: calc(100dvh - 190px);
+  min-height: 380px;
+}
+.chat-hd {
+  background: linear-gradient(135deg,#3A7BF7,#6A4CF7);
+  border-radius: var(--r) var(--r) 0 0;
+  padding: 13px 14px;
+  display: flex; align-items: center; gap: 11px;
+}
+.doc-av {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; border: 2px solid rgba(255,255,255,0.35);
+  flex-shrink: 0;
+}
+.doc-name { color: #fff; font-weight: 700; font-size: 14px; }
+.doc-status { color: rgba(255,255,255,0.8); font-size: 11px; display: flex; align-items: center; gap: 4px; margin-top:2px; }
+.online-dot { width:6px; height:6px; background:#4AFA9A; border-radius:50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.chat-msgs {
+  flex: 1; overflow-y: auto; padding: 12px;
+  background: var(--surface); display: flex;
+  flex-direction: column; gap: 10px;
+  -webkit-overflow-scrolling: touch;
+}
+.msg { display: flex; gap: 7px; max-width: 90%; }
+.msg.user { align-self: flex-end; flex-direction: row-reverse; }
+.msg-av {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: center; font-size: 15px;
+}
+.msg.user .msg-av { background: var(--accent); }
+.msg-bub {
+  padding: 9px 13px; border-radius: 16px;
+  font-size: 13px; line-height: 1.5;
+  background: var(--surface2); color: var(--text);
+}
+.msg.user .msg-bub {
+  background: linear-gradient(135deg,var(--accent),#6A9FF7);
+  color: #fff; border-radius: 16px 16px 4px 16px;
+}
+.msg:not(.user) .msg-bub { border-radius: 16px 16px 16px 4px; }
+.msg-time { font-size: 9.5px; color: var(--text3); margin-top: 3px; }
+
+.typing-bub {
+  display: flex; gap: 4px; align-items: center;
+  padding: 9px 13px; background: var(--surface2);
+  border-radius: 16px 16px 16px 4px; width: fit-content;
+}
+.t-dot {
+  width: 7px; height: 7px; background: var(--text3);
+  border-radius: 50%; animation: tdot 1.2s infinite;
+}
+.t-dot:nth-child(2){ animation-delay:0.2s; }
+.t-dot:nth-child(3){ animation-delay:0.4s; }
+@keyframes tdot { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+
+.quick-qs {
+  padding: 8px 12px; background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+.qq-lbl { font-size: 10px; color: var(--text3); margin-bottom: 6px; }
+.qq-scroll { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.qq-scroll::-webkit-scrollbar { display: none; }
+.qq-btn {
+  flex-shrink: 0; padding: 6px 12px; border-radius: 16px;
+  font-size: 11.5px; font-weight: 500;
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text2); cursor: pointer; white-space: nowrap;
+  font-family: inherit; transition: all 0.15s;
+}
+.qq-btn:active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.chat-input-area {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-radius: 0 0 var(--r) var(--r);
+  padding: 9px 11px;
+  display: flex; gap: 8px; align-items: flex-end;
+}
+.chat-inp {
+  flex: 1; background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 20px; padding: 9px 13px;
+  font-size: 14px; resize: none; max-height: 80px;
+  outline: none; font-family: inherit; color: var(--text);
+  line-height: 1.4;
+}
+.chat-inp:focus { border-color: var(--accent); }
+.send-btn {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--accent); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(58,123,247,0.35);
+  transition: transform 0.1s;
+}
+.send-btn:active { transform: scale(0.9); }
+
+/* ---- WATER ---- */
+.water-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin: 12px 0; }
+.w-glass {
+  aspect-ratio: 0.65; border-radius: 8px;
+  border: 2px solid var(--border);
+  background: var(--surface2); cursor: pointer;
+  transition: all 0.2s; display: flex;
+  align-items: flex-end; overflow: hidden;
+  position: relative;
+}
+.w-glass.filled { border-color: #3A9DF7; }
+.w-fill { width: 100%; background: linear-gradient(180deg,#74C6FF,#3A7BF7); transition: height 0.3s; height: 0; }
+.w-glass.filled .w-fill { height: 100%; }
+.w-em {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  font-size: 20px; pointer-events: none;
+}
+
+/* ---- MOOD ---- */
+.mood-row { display: flex; justify-content: space-around; padding: 8px 0 12px; }
+.mood-btn {
+  text-align: center; cursor: pointer; padding: 8px;
+  border-radius: 12px; transition: background 0.15s;
+  border: none; background: transparent; font-family: inherit;
+}
+.mood-btn:active { background: var(--surface2); }
+.mood-em { font-size: 30px; }
+.mood-lbl { font-size: 9.5px; color: var(--text3); margin-top: 4px; }
+
+/* ---- SLEEP BARS ---- */
+.sleep-bars {
+  display: flex; gap: 6px; align-items: flex-end; height: 80px; margin: 10px 0;
+}
+.sb-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.sb { width: 100%; border-radius: 4px 4px 0 0; }
+.sb-lbl { font-size: 9px; color: var(--text3); }
+
+/* ---- HISTORY ---- */
+.hist-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 0; border-bottom: 1px solid var(--border);
+}
+.hist-item:last-child { border-bottom: none; }
+.hist-ic { font-size: 20px; }
+.hist-info { flex: 1; }
+.hist-name { font-weight: 600; font-size: 13px; }
+.hist-date { font-size: 10.5px; color: var(--text3); margin-top: 1px; }
+.hist-val { font-size: 15px; font-weight: 700; }
+
+/* ---- NUTRITION ---- */
+.nutr-item { margin-bottom: 8px; }
+
+/* ---- UTIL ---- */
+.mt8 { margin-top: 8px; }
+.mt10 { margin-top: 10px; }
+.mt12 { margin-top: 12px; }
+.flex-row { display: flex; gap: 8px; align-items: center; }
+.txt-center { text-align: center; }
+.fw7 { font-weight: 700; }
+.fs11 { font-size: 11px; }
+.fs12 { font-size: 12px; }
+.c-text2 { color: var(--text2); }
+.c-accent { color: var(--accent); }
+.c-accent2 { color: var(--accent2); }
+.c-accent3 { color: var(--accent3); }
+.c-accent4 { color: var(--accent4); }
+
+/* ---- SAFE AREA (iPhone notch) ---- */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  body { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
+  .bottom-nav { padding-bottom: env(safe-area-inset-bottom); height: calc(62px + env(safe-area-inset-bottom)); }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">💙</div>
+    <div class="logo-text">Health<span>Pulse</span></div>
+  </div>
+  <div class="ai-badge">AI Powered</div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="bnav-item active" id="bnav-dashboard" onclick="showSec('dashboard')">
+    <span class="bnav-icon">🏠</span>
+    <span class="bnav-label">Home</span>
+  </button>
+  <button class="bnav-item" id="bnav-heart" onclick="showSec('heart')">
+    <span class="bnav-icon">❤️</span>
+    <span class="bnav-label">Heart</span>
+  </button>
+  <button class="bnav-item" id="bnav-bmi" onclick="showSec('bmi')">
+    <span class="bnav-icon">⚖️</span>
+    <span class="bnav-label">BMI</span>
+  </button>
+  <button class="bnav-item" id="bnav-steps" onclick="showSec('steps')">
+    <span class="bnav-icon">👣</span>
+    <span class="bnav-label">Steps</span>
+  </button>
+  <button class="bnav-item" id="bnav-exercise" onclick="showSec('exercise')">
+    <span class="bnav-icon">🏃</span>
+    <span class="bnav-label">Exercise</span>
+  </button>
+  <button class="bnav-item" id="bnav-aidoctor" onclick="showSec('aidoctor')">
+    <span class="bnav-icon">🩺</span>
+    <span class="bnav-label">AI Doc</span>
+  </button>
+  <button class="bnav-item" id="bnav-wellness" onclick="showSec('wellness')">
+    <span class="bnav-icon">💧</span>
+    <span class="bnav-label">Wellness</span>
+  </button>
+</nav>
+
+<!-- ============================================================ -->
+<!--  DASHBOARD -->
+<!-- ============================================================ -->
+<div id="dashboard" class="section active">
+  <div class="hero">
+    <h1>Good Morning! 👋</h1>
+    <p>Track your health daily. Small steps lead to big changes.</p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-num" id="dash-steps">4,821</div>
+        <div class="hero-stat-lbl">Steps</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num" id="dash-heart">72</div>
+        <div class="hero-stat-lbl">Heart Rate</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num" id="dash-water">5/8</div>
+        <div class="hero-stat-lbl">Water</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-ic" style="background:#EEF3FA">📊</div>
+      <div>
+        <div class="card-title">Daily Overview</div>
+        <div class="card-sub">Updated just now</div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="mini-card">
+        <div class="mini-lbl">Blood Pressure</div>
+        <div class="mini-val c-accent">120/80</div>
+        <div class="mini-badge bg-green">✅ Normal</div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-lbl">BMI</div>
+        <div class="mini-val c-accent2">22.4</div>
+        <div class="mini-badge bg-green">✅ Healthy</div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-lbl">Calories Burned</div>
+        <div class="mini-val c-accent3">342</div>
+        <div class="fs11 c-text2 mt8">Goal: 500 kcal</div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-lbl">Sleep Last Night</div>
+        <div class="mini-val c-accent4">7h 20m</div>
+        <div class="mini-badge bg-green">✅ Good</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-ic" style="background:#FEE8E8">🔔</div>
+      <div><div class="card-title">Today's Reminders</div></div>
+    </div>
+    <div class="rem-item">
+      <span class="rem-em">💊</span>
+      <span class="rem-txt">Take morning vitamins</span>
+      <span class="rem-status bg-green">Done</span>
+    </div>
+    <div class="rem-item">
+      <span class="rem-em">🏃</span>
+      <span class="rem-txt">30 min walk</span>
+      <span class="rem-status bg-yellow">Pending</span>
+    </div>
+    <div class="rem-item">
+      <span class="rem-em">💧</span>
+      <span class="rem-txt">Drink 3 more glasses of water</span>
+      <span class="rem-status bg-yellow">Pending</span>
+    </div>
+    <div class="rem-item">
+      <span class="rem-em">🩺</span>
+      <span class="rem-txt">Evening BP check</span>
+      <span class="rem-status bg-blue">Later</span>
+    </div>
+  </div>
+
+  <button class="btn btn-primary" onclick="showSec('aidoctor')">🩺 Talk to AI Doctor Now</button>
+</div>
+
+<!-- ============================================================ -->
+<!--  HEART & BP -->
+<!-- ============================================================ -->
+<div id="heart" class="section">
+  <div class="sec-title">❤️ Heart <span>& Blood Pressure</span></div>
+
+  <div class="info-box blue">
+    <span class="info-box-ic">ℹ️</span>
+    <div><strong>How to check BP at home:</strong> Sit still 5 min. Wrap cuff 2 cm above left elbow at heart level. Don't talk or move. Take 2 readings 1 min apart.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-ic" style="background:#FEE8E8">💓</div>
+      <div>
+        <div class="card-title">Blood Pressure Monitor</div>
+        <div class="card-sub">Enter your reading</div>
+      </div>
+    </div>
+    <div class="inp-row">
+      <div class="inp-group">
+        <div class="lbl">SYSTOLIC (Upper)</div>
+        <input type="number" class="inp" id="bp-sys" placeholder="120" inputmode="numeric">
+        <div class="inp-unit">mmHg</div>
+      </div>
+      <div class="inp-group">
+        <div class="lbl">DIASTOLIC (Lower)</div>
+        <input type="number" class="inp" id="bp-dia" placeholder="80" inputmode="numeric">
+        <div class="inp-unit">mmHg</div>
+      </div>
+    </div>
+    <div class="inp-group">
+      <div class="lbl">HEART RATE</div>
+      <input type="number" class="inp" id="heart-rate" placeholder="72" inputmode="numeric">
+      <div class="inp-unit">beats per minute</div>
+    </div>
+    <button class="btn btn-primary mt8" onclick="checkBP()">Check My BP</button>
+    <div id="bp-result"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-ic" style="background:#FEE8E8">📊</div>
+      <div><div class="card-title">BP Reference Chart</div></div>
+    </div>
+    <table class="rtable">
+      <tr><th>Category</th><th>Systolic</th><th>Diastolic</th></tr>
+      <tr><td>🟢 Normal</td><td>&lt;120</td><td>&lt;80</td></tr>
+      <tr><td>🟡 Elevated</td><td>120–129</td><td>&lt;80</td></tr>
+      <tr><td>🟠 High Stage 1</td><td>130–139</td><td>80–89</td></tr>
+      <tr><td>🔴 High Stage 2</td><td>140+</td><td>90+</td></tr>
+      <tr><td>🆘 Crisis</td><td>180+</td><td>120+</td></tr>
+      <tr><td>🔵 Low (Hypo)</td><td>&lt;90</td><td>&lt;60</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-ic" style="background:#FEE8E8">💗</div>
+      <div><div class="card-title">Heart Rate Zones</div></div>
+    </div>
+    <table class="rtable">
+      <tr><th>Zone</th><th>BPM</th><th>State</th></tr>
+      <tr><td>🔵 Resting</td><td>60–100</td><td>Normal</td></tr>
+      <tr><td>🟢 Fat Burn</td><td>100–130</td><td>Light Exercise</td></tr>
+      <tr><td>🟡 Cardio</td><td>130–155</td><td>Moderate</td></tr>
+      <tr><td>🔴 Peak</td><td>155–185</td><td>Intense</td></tr>
+      <tr><td>🆘 Too High</td><td>185+</td><td>Seek help</td></tr>
+    </table>
+  </div>
+
+  <div class="info-box" style="background:#FEE8E8;color:#8A1515;border-left:3px solid var(--red);margin-bottom:10px">
+    <span class="info-box-ic">🚨</span>
+    <div><strong>Emergency Signs:</strong> Chest pain, severe headache, blurred vision, difficulty breathing, arm numbness — <strong>Call 112 immediately.</strong></div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-ic" style="background:#E6FAF4">📋</div>
+      <div><div class="card-title">Recent Readings</div></div>
+    </div>
+    <div class="hist-item">
+      <span class="hist-ic">❤️</span>
+      <div class="hist-info">
+        <div class="hist-name">Blood Pressure</div>
+        <div class="hist-date">Today, 8:00 AM</div>
+      </div>
+      <div class="txt-center">
+        <div class="hist-val c-accent2">120/80</div>
+        <div class="fs11 c-text2">Normal</div>
+      </div>
+    </div>
+    <div class="hist-item">
+      <span class="hist-ic">❤️</span>
+      <div class="hist-info">
+        <div class="hist-name">Blood Pressure</div>
+        <div class="hist-date">Yesterday, 8:30 AM</div>
+      </div>
+      <div class="txt-center">
+        <div class="hist-val c-accent2">118/78</div>
+        <div class="fs11 c-text2">Normal</div>
+      </div>
+    </div>
+    <div class="hist-item">
+      <span class="hist-ic">❤️</span>
+      <div class="hist-info">
+        <div class="hist-name">Blood Pressure</div>
+        <div class="hist-date">2 days ago</div>
+      </div>
+      <div class="txt-center">
+        <div class="hist-val" style="color:#D97706">132/85</div>
+        <div class="fs11 c-text2">Elevated</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  BMI -->
+<!-- ============================================================ -->
+<div id="bmi" class="section">
+  <div class="sec-title">⚖️ BMI <span>Calculator</span></div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-ic" style="background:#E8F0FE">📏</div>
+      <div>
+        <div class="card-title">Body Mass Index</div>
+        <div class="card-sub">Weight ÷ Height²</div>
+      </div>
+    </div>
+    <div class="inp-row">
+      <div class="inp-group">
+        <div class="lbl">HEIGHT</div>
+        <input type="number" class="inp" id="bmi-height" placeholder="170" inputmode="numeric">
+        <div class="inp-unit">centimeters</div>
+      </div>
+      <div class="inp-group">
+        <div class="lbl">WEIGHT</div>
+        <input type="number" class="inp" id="bmi-weight" placeholder="65" inputmode="numeric">
+        <div class="inp-unit">kilograms</div>
+      </div>
+    </div>
+    <div class="inp-row">
+      <div class="inp-group">
+        <div class="lbl">AGE</div>
+        <input type="number" class="inp" id="bmi-age" placeholder="30" inputmode="numeric">
+        <div class="inp-unit">years</div>
+      </div>
+      <div class="inp-group">
+        <div class="lbl">GENDER</div>
+        <select class="inp" id="bmi-gender">
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+        <div class="inp-unit">&nbsp;</div>
+      </div>
+    </div>
+    <button class="btn btn-primary mt8" onclick="calcBMI()">Calculate BMI</button>
+    <div id="bmi-result"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-ic" style="background:#E8F0FE">📊</div>
+      <div><div class="card-title">BMI Categories</div></div>
+    </div>
+    <div class="bmi-scale">
+      <div class="bmi-seg" style="background:#74C6FF"></div>
+      <div class="bmi-seg" style="background:#4ACA8A"></div>
+      <div class="bmi-seg" style="background:#F9C74F"></div>
+      <div class="bmi-seg" style="background:#F76A3A"></div>
+      <div class="bmi-seg" style="background:#F74A4A"></div>
+    </div>
+    <div class="bmi-labels">
+      <span>16</span><span>18.5</span><span>25</span><span>30</span><span>35</span><span>40</span>
+    </div>
+    <table class="rtable mt10">
+      <tr><th>Category</th><th>BMI</th></tr>
+      <tr><td>🔵 Underweight</td><td>&lt; 18.5</td></tr>
+      <tr><td>🟢 Normal</td><td>18.5 – 24.9</td></tr>
+      <tr><td>🟡 Overweight</td><td>25.0 – 29.9</td></tr>
+      <tr><td>🟠 Obese Class I</td><td>30.0 – 34.9</td></tr>
+      <tr><td>🔴 Obese Class II</td><td>35.0 – 39.9</td></tr>
+      <tr><td>🔴 Extreme Obesity</td><td>≥ 40.0</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-ic" style="background:#E8F0FE">🎯</div>
+      <div><div class="card-title">Ideal Weight Range</div></div>
+    </div>
+    <div id="ideal-weight">
+      <div class="info-box blue" style="margin:0">
+        <span class="info-box-ic">💡</span>
+        <div>Enter your height above and click Calculate to see your ideal weight range.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  STEPS -->
+<!-- ============================================================ -->
+<div id="steps" class="section">
+  <div class="sec-title">👣 Step <span>Tracker</span></div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-ic" style="background:#E8FAF4">🚶</div>
+      <div>
+        <div class="card-title">Today's Steps</div>
+        <div class="card-sub">Daily goal: 10,000 steps</div>
+      </div>
+    </div>
+    <div class="steps-big">
+      <div class="steps-num" id="steps-count">4,821</div>
+      <div class="steps-lbl">steps today</div>
+    </div>
+    <div class="prog-bg">
+      <div class="prog-fill" id="steps-bar" style="width:48%"></div>
+    </div>
+    <div class="prog-row">
+      <span>0</span>
+      <span id="steps-pct" class="fw7 c-accent">48% of goal</span>
+      <span>10,000</span>
+    </div>
+    <div class="mt12">
+      <div class="lbl">UPDATE STEPS</div>
+      <div class="flex-row mt8">
+        <input type="number" class="inp" id="steps-input" placeholder="Enter steps" inputmode="numeric" style="flex:1">
+        <button class="btn btn-green btn-sm" onclick="updateSteps()">Update</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-ic" style="background:#E8FAF4">🔢</div>
+      <div><div class="card-title">Step Stats</div></div>
+    </div>
+    <div class="grid2">
+      <div class="mini-card txt-center">
+        <div style="font-size:22px">🔥</div>
+        <div class="mini-val c-accent3 mt8">241</div>
+        <div class="fs11 c-text2">Calories Burned</div>
+      </div>
+      <div class="mini-card txt-center">
+        <div style="font-size:22px">📍</div>
+        <div class="mini-val c-accent mt8">3.6 km</div>
+        <div class="fs11 c-text2">Distance</div>
+      </div>
+      <div class="mini-card txt-center">
+        <div style="font-size:22px">⏱️</div>
+        <div class="mini-val c-accent4 mt8">48 min</div>
+        <div class="fs11 c-text2">Active Time</div>
+      </div>
+      <div class="mini-card txt-center">
+        <div style="font-size:22px">💓</div>
+        <div class="mini-val" style="color:var(--red)" >74 bpm</div>
+        <div class="fs11 c-text2">Avg Heart Rate</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-ic" style="background:#E8FAF4">📅</div>
+      <div><div class="card-title">This Week</div></div>
+    </div>
+    <div class="week-chart" id="week-chart">
+      <div class="wbar-wrap"><div class="wbar" style="height:70px;background:#3A7BF7"></div><span class="wbar-lbl">Mon</span></div>
+      <div class="wbar-wrap"><div class="wbar" style="height:90px;background:#3A7BF7"></div><span class="wbar-lbl">Tue</span></div>
+      <div class="wbar-wrap"><div class="wbar" style="height:55px;background:#3A7BF7"></div><span class="wbar-lbl">Wed</span></div>
+      <div class="wbar-wrap"><div class="wbar" style="height:90px;background:#3A7BF7"></div><span class="wbar-lbl">Thu</span></div>
+      <div class="wbar-wrap"><div class="wbar" style="height:80px;background:#3A7BF7"></div><span class="wbar-lbl">Fri</span></div>
+      <div class="wbar-wrap"><div class="wbar" style="height:65px;background:#22C9A0"></div><span class="wbar-lbl">Sat</span></div>
+      <div class="wbar-wrap"><div class="wbar" style="height:46px;background:#DDE5F0"></div><span class="wbar-lbl">Sun</span></div>
+    </div>
+    <div class="txt-center fs12 c-text2 mt8">This week: <strong>52,140 steps</strong> • Avg: <strong>7,449/day</strong></div>
+  </div>
+
+  <div class="info-box green">
+    <span class="info-box-ic">💡</span>
+    <div><strong>Did you know?</strong> Walking 10,000 steps daily reduces heart disease risk by 30%, improves mood, and burns ~400 calories. Start with 5,000 and increase weekly!</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  EXERCISE -->
+<!-- ============================================================ -->
+<div id="exercise" class="section">
+  <div class="sec-title">🏃 Exercise <span>Library</span></div>
+
+  <div class="filter-row">
+    <button class="f-btn active" onclick="filterEx('all',this)">All</button>
+    <button class="f-btn" onclick="filterEx('cardio',this)">❤️ Cardio</button>
+    <button class="f-btn" onclick="filterEx('strength',this)">💪 Strength</button>
+    <button class="f-btn" onclick="filterEx('flex',this)">🧘 Flexibility</button>
+    <button class="f-btn" onclick="filterEx('balance',this)">⚖️ Balance</button>
+  </div>
+
+  <!-- Morning Walk -->
+  <div class="ex-card" data-cat="cardio">
+    <div class="ex-hd" onclick="toggleEx(this)">
+      <div class="ex-em" style="background:#FFE8E8">🚶</div>
+      <div class="ex-meta">
+        <div class="ex-name">Morning Brisk Walk</div>
+        <div class="ex-tags">
+          <span class="etag tag-cardio">Cardio</span>
+          <span class="etag tag-beg">Beginner</span>
+        </div>
+      </div>
+      <span class="ex-arrow">▼</span>
+    </div>
+    <div class="ex-body">
+      <div class="ex-stats3">
+        <div class="exs"><div class="exs-n">30 min</div><div class="exs-l">Duration</div></div>
+        <div class="exs"><div class="exs-n">200 kcal</div><div class="exs-l">Burns</div></div>
+        <div class="exs"><div class="exs-n">Daily</div><div class="exs-l">Frequency</div></div>
+      </div>
+      <p class="ex-desc">A 30-minute brisk walk every morning is the most effective low-impact exercise. It raises your heart rate, improves circulation, and sets a positive tone for the day.</p>
+      <div class="how-box">
+        <div class="how-title">📋 HOW TO DO IT</div>
+        <ul class="how-list">
+          <li data-n="1">Wear comfortable shoes and breathable clothes.</li>
+          <li data-n="2">Start with 5-min slow warm-up walk.</li>
+          <li data-n="3">Increase pace — slightly out of breath but can still talk.</li>
+          <li data-n="4">Swing arms naturally, keep upright posture.</li>
+          <li data-n="5">End with 5-min cool-down and light leg stretches.</li>
+        </ul>
+      </div>
+      <div class="how-box" style="background:#E6FAF4">
+        <div class="how-title green">✅ HEALTH BENEFITS</div>
+        <div class="ben-list">
+          <div class="ben-item"><span class="ben-ic">❤️</span>Lowers blood pressure — reduces heart disease risk by 30%</div>
+          <div class="ben-item"><span class="ben-ic">🩸</span>Controls blood sugar — great for Type 2 diabetes</div>
+          <div class="ben-item"><span class="ben-ic">🧠</span>Releases endorphins — reduces anxiety and depression</div>
+          <div class="ben-item"><span class="ben-ic">⚖️</span>Helps maintain healthy weight and metabolism</div>
+          <div class="ben-item"><span class="ben-ic">😴</span>Improves sleep quality at night</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Surya Namaskar -->
+  <div class="ex-card" data-cat="flex">
+    <div class="ex-hd" onclick="toggleEx(this)">
+      <div class="ex-em" style="background:#E8FAF4">🧘</div>
+      <div class="ex-meta">
+        <div class="ex-name">Surya Namaskar</div>
+        <div class="ex-tags">
+          <span class="etag tag-flex">Flexibility</span>
+          <span class="etag tag-strength">Strength</span>
+          <span class="etag tag-beg">Beginner</span>
+        </div>
+      </div>
+      <span class="ex-arrow">▼</span>
+    </div>
+    <div class="ex-body">
+      <div class="ex-stats3">
+        <div class="exs"><div class="exs-n">20 min</div><div class="exs-l">Duration</div></div>
+        <div class="exs"><div class="exs-n">150 kcal</div><div class="exs-l">Burns</div></div>
+        <div class="exs"><div class="exs-n">Daily</div><div class="exs-l">Frequency</div></div>
+      </div>
+      <p class="ex-desc">Surya Namaskar is a complete body workout in 12 steps. It combines stretching, breathing, and strength — great for flexibility and mental calm. Do 5–12 rounds each morning.</p>
+      <div class="how-box">
+        <div class="how-title">📋 12 POSES SEQUENCE</div>
+        <ul class="how-list">
+          <li data-n="1">Pranamasana — Stand, palms together. Inhale.</li>
+          <li data-n="2">Hasta Uttanasana — Arms up and back. Inhale.</li>
+          <li data-n="3">Hasta Padasana — Forward bend, touch toes. Exhale.</li>
+          <li data-n="4">Ashwa Sanchalanasana — Lunge back, look up. Inhale.</li>
+          <li data-n="5">Dandasana — Plank position. Hold.</li>
+          <li data-n="6">Ashtanga Namaskara — Knees, chest, forehead down. Exhale.</li>
+          <li data-n="7">Bhujangasana — Cobra pose, arch back. Inhale.</li>
+          <li data-n="8">Adho Mukha — Downward dog. Exhale.</li>
+          <li data-n="9">Lunge forward again. Inhale.</li>
+          <li data-n="10">Forward bend again. Exhale.</li>
+          <li data-n="11">Arms up, stretch. Inhale.</li>
+          <li data-n="12">Return to prayer pose. Exhale.</li>
+        </ul>
+      </div>
+      <div class="how-box" style="background:#E6FAF4">
+        <div class="how-title green">✅ HEALTH BENEFITS</div>
+        <div class="ben-list">
+          <div class="ben-item"><span class="ben-ic">🌿</span>Full body stretch — spine, hips, shoulders flexibility</div>
+          <div class="ben-item"><span class="ben-ic">💪</span>Tones arms, core, thighs, and back</div>
+          <div class="ben-item"><span class="ben-ic">🧠</span>Calms mind, reduces cortisol (stress hormone)</div>
+          <div class="ben-item"><span class="ben-ic">🌬️</span>Deep breathing improves lung capacity</div>
+          <div class="ben-item"><span class="ben-ic">⚡</span>Boosts energy and metabolism all day</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Squats -->
+  <div class="ex-card" data-cat="strength">
+    <div class="ex-hd" onclick="toggleEx(this)">
+      <div class="ex-em" style="background:#E8F0FE">🏋️</div>
+      <div class="ex-meta">
+        <div class="ex-name">Bodyweight Squats</div>
+        <div class="ex-tags">
+          <span class="etag tag-strength">Strength</span>
+          <span class="etag tag-beg">Beginner</span>
+        </div>
+      </div>
+      <span class="ex-arrow">▼</span>
+    </div>
+    <div class="ex-body">
+      <div class="ex-stats3">
+        <div class="exs"><div class="exs-n">3 sets</div><div class="exs-l">Volume</div></div>
+        <div class="exs"><div class="exs-n">15 reps</div><div class="exs-l">Per Set</div></div>
+        <div class="exs"><div class="exs-n">3x/week</div><div class="exs-l">Frequency</div></div>
+      </div>
+      <p class="ex-desc">Squats are the king of lower body exercises. They strengthen quads, glutes, hamstrings, and core without any equipment. Perfect to do at home anytime.</p>
+      <div class="how-box">
+        <div class="how-title">📋 HOW TO DO IT</div>
+        <ul class="how-list">
+          <li data-n="1">Stand feet shoulder-width apart, toes slightly out.</li>
+          <li data-n="2">Keep chest up, back straight, core tight.</li>
+          <li data-n="3">Push hips back, bend knees until thighs are parallel to floor.</li>
+          <li data-n="4">Knees track over toes — don't collapse inward.</li>
+          <li data-n="5">Drive through heels to stand back up. That's 1 rep.</li>
+          <li data-n="6">Rest 60 sec between sets.</li>
+        </ul>
+      </div>
+      <div class="how-box" style="background:#E6FAF4">
+        <div class="how-title green">✅ HEALTH BENEFITS</div>
+        <div class="ben-list">
+          <div class="ben-item"><span class="ben-ic">🦵</span>Builds and tones legs — quads, glutes, hamstrings</div>
+          <div class="ben-item"><span class="ben-ic">🔥</span>Burns 300–400 kcal per full session</div>
+          <div class="ben-item"><span class="ben-ic">🦴</span>Improves bone density and joint health</div>
+          <div class="ben-item"><span class="ben-ic">⚖️</span>Boosts metabolism even at rest</div>
+          <div class="ben-item"><span class="ben-ic">💪</span>Engages core — builds abdominal strength</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pranayama -->
+  <div class="ex-card" data-cat="flex">
+    <div class="ex-hd" onclick="toggleEx(this)">
+      <div class="ex-em" style="background:#F3E8FF">🌬️</div>
+      <div class="ex-meta">
+        <div class="ex-name">Pranayama (Breathing)</div>
+        <div class="ex-tags">
+          <span class="etag tag-flex">Flexibility</span>
+          <span class="etag tag-balance">Balance</span>
+          <span class="etag tag-beg">Beginner</span>
+        </div>
+      </div>
+      <span class="ex-arrow">▼</span>
+    </div>
+    <div class="ex-body">
+      <div class="ex-stats3">
+        <div class="exs"><div class="exs-n">15 min</div><div class="exs-l">Duration</div></div>
+        <div class="exs"><div class="exs-n">50 kcal</div><div class="exs-l">Burns</div></div>
+        <div class="exs"><div class="exs-n">Daily</div><div class="exs-l">Frequency</div></div>
+      </div>
+      <p class="ex-desc">Pranayama (controlled breathing) is the most powerful practice for heart, lungs, and mental health. Do it in the morning on an empty stomach for best results.</p>
+      <div class="how-box">
+        <div class="how-title">📋 KEY TECHNIQUES</div>
+        <ul class="how-list">
+          <li data-n="1"><strong>Anulom Vilom:</strong> Close right nostril, inhale left. Close left, exhale right. 10 rounds.</li>
+          <li data-n="2"><strong>Bhramari:</strong> Hum like a bee on exhale, thumbs on ears. 5 rounds.</li>
+          <li data-n="3"><strong>Kapalbhati:</strong> Quick forceful exhales, 1/sec, for 2 min.</li>
+          <li data-n="4"><strong>4-7-8:</strong> Inhale 4 sec, hold 7 sec, exhale 8 sec. Deeply calming.</li>
+          <li data-n="5">Sit cross-legged, spine straight throughout.</li>
+        </ul>
+      </div>
+      <div class="how-box" style="background:#E6FAF4">
+        <div class="how-title green">✅ HEALTH BENEFITS</div>
+        <div class="ben-list">
+          <div class="ben-item"><span class="ben-ic">🫁</span>Increases lung capacity by up to 50%</div>
+          <div class="ben-item"><span class="ben-ic">❤️</span>Lowers heart rate and blood pressure</div>
+          <div class="ben-item"><span class="ben-ic">🧠</span>Reduces anxiety and panic attacks</div>
+          <div class="ben-item"><span class="ben-ic">😴</span>4-7-8 breathing cures insomnia</div>
+          <div class="ben-item"><span class="ben-ic">⚡</span>Increases energy and mental clarity</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Plank -->
+  <div class="ex-card" data-cat="strength">
+    <div class="ex-hd" onclick="toggleEx(this)">
+      <div class="ex-em" style="background:#E8F0FE">🧱</div>
+      <div class="ex-meta">
+        <div class="ex-name">Plank (Core Strength)</div>
+        <div class="ex-tags">
+          <span class="etag tag-strength">Strength</span>
+          <span class="etag tag-mid">Intermediate</span>
+        </div>
+      </div>
+      <span class="ex-arrow">▼</span>
+    </div>
+    <div class="ex-body">
+      <div class="ex-stats3">
+        <div class="exs"><div class="exs-n">3 sets</div><div class="exs-l">Volume</div></div>
+        <div class="exs"><div class="exs-n">30–60 sec</div><div class="exs-l">Hold</div></div>
+        <div class="exs"><div class="exs-n">5x/week</div><div class="exs-l">Frequency</div></div>
+      </div>
+      <p class="ex-desc">The plank activates your entire core, back, and stabilizer muscles simultaneously. It's the single best exercise to build a strong, pain-free back.</p>
+      <div class="how-box">
+        <div class="how-title">📋 HOW TO DO IT</div>
+        <ul class="how-list">
+          <li data-n="1">Forearms on ground, elbows under shoulders.</li>
+          <li data-n="2">Body in straight line from head to heels — no sagging.</li>
+          <li data-n="3">Pull belly button toward spine to engage core.</li>
+          <li data-n="4">Breathe normally. Hold 20–60 seconds.</li>
+          <li data-n="5">Rest 30 sec between sets. Do 3 sets daily.</li>
+        </ul>
+      </div>
+      <div class="how-box" style="background:#E6FAF4">
+        <div class="how-title green">✅ HEALTH BENEFITS</div>
+        <div class="ben-list">
+          <div class="ben-item"><span class="ben-ic">🦴</span>Eliminates lower back pain permanently</div>
+          <div class="ben-item"><span class="ben-ic">💪</span>Activates all core muscles: abs, obliques, back</div>
+          <div class="ben-item"><span class="ben-ic">🏃</span>Improves posture and reduces neck strain</div>
+          <div class="ben-item"><span class="ben-ic">⚖️</span>Improves balance and body coordination</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Jumping Jacks -->
+  <div class="ex-card" data-cat="cardio">
+    <div class="ex-hd" onclick="toggleEx(this)">
+      <div class="ex-em" style="background:#FFE8E8">⭐</div>
+      <div class="ex-meta">
+        <div class="ex-name">Jumping Jacks</div>
+        <div class="ex-tags">
+          <span class="etag tag-cardio">Cardio</span>
+          <span class="etag tag-beg">Beginner</span>
+        </div>
+      </div>
+      <span class="ex-arrow">▼</span>
+    </div>
+    <div class="ex-body">
+      <div class="ex-stats3">
+        <div class="exs"><div class="exs-n">3 sets</div><div class="exs-l">Volume</div></div>
+        <div class="exs"><div class="exs-n">50 reps</div><div class="exs-l">Per Set</div></div>
+        <div class="exs"><div class="exs-n">Daily</div><div class="exs-l">Frequency</div></div>
+      </div>
+      <p class="ex-desc">Jumping jacks are a classic full-body cardio exercise done anywhere. Great for warming up, burning calories fast, and improving cardiovascular fitness quickly.</p>
+      <div class="how-box">
+        <div class="how-title">📋 HOW TO DO IT</div>
+        <ul class="how-list">
+          <li data-n="1">Stand straight, feet together, arms at sides.</li>
+          <li data-n="2">Jump, spread feet wide, raise arms overhead.</li>
+          <li data-n="3">Jump back to starting position.</li>
+          <li data-n="4">Land softly on balls of feet.</li>
+          <li data-n="5">Maintain steady rhythm; increase speed gradually.</li>
+        </ul>
+      </div>
+      <div class="how-box" style="background:#E6FAF4">
+        <div class="how-title green">✅ HEALTH BENEFITS</div>
+        <div class="ben-list">
+          <div class="ben-item"><span class="ben-ic">🔥</span>Burns 100 calories in just 10 minutes</div>
+          <div class="ben-item"><span class="ben-ic">❤️</span>Excellent cardio — raises heart rate fast</div>
+          <div class="ben-item"><span class="ben-ic">🦴</span>Improves bone density</div>
+          <div class="ben-item"><span class="ben-ic">😊</span>Instant mood boost from endorphins</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Balasana -->
+  <div class="ex-card" data-cat="balance">
+    <div class="ex-hd" onclick="toggleEx(this)">
+      <div class="ex-em" style="background:#FFF0E8">🙇</div>
+      <div class="ex-meta">
+        <div class="ex-name">Balasana + Shavasana</div>
+        <div class="ex-tags">
+          <span class="etag tag-balance">Balance</span>
+          <span class="etag tag-flex">Flexibility</span>
+          <span class="etag tag-beg">Beginner</span>
+        </div>
+      </div>
+      <span class="ex-arrow">▼</span>
+    </div>
+    <div class="ex-body">
+      <div class="ex-stats3">
+        <div class="exs"><div class="exs-n">10 min</div><div class="exs-l">Duration</div></div>
+        <div class="exs"><div class="exs-n">20 kcal</div><div class="exs-l">Burns</div></div>
+        <div class="exs"><div class="exs-n">Daily</div><div class="exs-l">Frequency</div></div>
+      </div>
+      <p class="ex-desc">Restorative yoga poses for recovery, relaxation, and nervous system reset. Perfect before bed or after intense workouts to reduce soreness and stress.</p>
+      <div class="how-box">
+        <div class="how-title">📋 HOW TO DO IT</div>
+        <ul class="how-list">
+          <li data-n="1"><strong>Balasana:</strong> Kneel, sit on heels, extend arms forward, forehead down. Hold 2 min.</li>
+          <li data-n="2">Feel stretch in lower back, hips, thighs. Breathe deeply.</li>
+          <li data-n="3"><strong>Shavasana:</strong> Lie flat on back, arms at sides (palms up), eyes closed.</li>
+          <li data-n="4">Relax every muscle from toes to face.</li>
+          <li data-n="5">Stay 5–10 minutes. Focus only on breath.</li>
+        </ul>
+      </div>
+      <div class="how-box" style="background:#E6FAF4">
+        <div class="how-title green">✅ HEALTH BENEFITS</div>
+        <div class="ben-list">
+          <div class="ben-item"><span class="ben-ic">🧠</span>Deep calm — activates parasympathetic nervous system</div>
+          <div class="ben-item"><span class="ben-ic">🦴</span>Relieves lower back, hip, and knee tension</div>
+          <div class="ben-item"><span class="ben-ic">😴</span>Dramatically improves sleep quality</div>
+          <div class="ben-item"><span class="ben-ic">🩸</span>Lowers cortisol and blood pressure within minutes</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box green">
+    <span class="info-box-ic">🌅</span>
+    <div><strong>Ideal Daily Routine:</strong> Morning — Surya Namaskar + Pranayama (30 min). Afternoon — 30-min walk. Evening — Squats + Plank (20 min). Bedtime — Balasana + Shavasana (10 min).</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  AI DOCTOR -->
+<!-- ============================================================ -->
+<div id="aidoctor" class="section">
+  <div class="sec-title">🩺 AI <span>Doctor Chat</span></div>
+
+  <div class="info-box yellow" style="margin-bottom:10px">
+    <span class="info-box-ic">⚠️</span>
+    <div>AI provides health guidance only. For emergencies call <strong>112</strong>. Not a replacement for real doctors.</div>
+  </div>
+
+  <div class="card" style="padding:0;overflow:hidden">
+    <div class="chat-wrap">
+      <div class="chat-hd">
+        <div class="doc-av">👨‍⚕️</div>
+        <div>
+          <div class="doc-name">Dr. AI — Health Assistant</div>
+          <div class="doc-status"><div class="online-dot"></div> Available 24/7 • Instant replies</div>
+        </div>
+      </div>
+      <div class="chat-msgs" id="chat-messages">
+        <div class="msg">
+          <div class="msg-av">👨‍⚕️</div>
+          <div>
+            <div class="msg-bub">Hello! I'm your AI Health Assistant 🩺<br><br>I can help you understand your <strong>BP readings</strong>, <strong>heart rate</strong>, <strong>BMI</strong>, <strong>symptoms</strong>, and general health questions.<br><br>What would you like to discuss today?</div>
+            <div class="msg-time">Just now</div>
+          </div>
+        </div>
+      </div>
+      <div class="quick-qs">
+        <div class="qq-lbl">Quick questions:</div>
+        <div class="qq-scroll">
+          <button class="qq-btn" onclick="quickQ(this)">My BP is 140/90, is it high?</button>
+          <button class="qq-btn" onclick="quickQ(this)">Normal heart rate for adults?</button>
+          <button class="qq-btn" onclick="quickQ(this)">I feel chest pain, what to do?</button>
+          <button class="qq-btn" onclick="quickQ(this)">How to reduce BP naturally?</button>
+          <button class="qq-btn" onclick="quickQ(this)">What is a healthy BMI?</button>
+          <button class="qq-btn" onclick="quickQ(this)">I have headache and dizziness</button>
+          <button class="qq-btn" onclick="quickQ(this)">How many steps should I walk daily?</button>
+          <button class="qq-btn" onclick="quickQ(this)">I feel tired all the time</button>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <textarea class="chat-inp" id="chat-input" placeholder="Describe symptoms or ask a health question…" rows="1" onkeydown="chatKeydown(event)"></textarea>
+        <button class="send-btn" onclick="sendMessage()">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  WELLNESS -->
+<!-- ============================================================ -->
+<div id="wellness" class="section">
+  <div class="sec-title">💧 Daily <span>Wellness</span></div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-ic" style="background:#E8F4FF">💧</div>
+      <div>
+        <div class="card-title">Water Intake Tracker</div>
+        <div class="card-sub">Goal: 8 glasses (2 liters) daily</div>
+      </div>
+    </div>
+    <div class="water-grid" id="water-grid"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span class="fs12 c-text2">Tap to add/remove</span>
+      <span id="water-count" class="fw7 c-accent" style="font-size:15px">5 / 8 glasses</span>
+    </div>
+    <div class="prog-bg mt8">
+      <div id="water-bar" class="prog-fill" style="width:62.5%;background:linear-gradient(90deg,#74C6FF,#3A7BF7)"></div>
+    </div>
+    <div class="info-box blue mt10">
+      <span class="info-box-ic">💡</span>
+      <div>Proper hydration improves kidney function, skin, digestion, and energy. Drink a glass first thing in the morning on an empty stomach!</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-ic" style="background:#F3E8FF">😴</div>
+      <div>
+        <div class="card-title">Sleep Tracker</div>
+        <div class="card-sub">Recommended: 7–9 hours for adults</div>
+      </div>
+    </div>
+    <div class="sleep-bars">
+      <div class="sb-wrap"><div class="sb" style="height:63px;background:#A259F7"></div><span class="sb-lbl">Mon</span></div>
+      <div class="sb-wrap"><div class="sb" style="height:72px;background:#A259F7"></div><span class="sb-lbl">Tue</span></div>
+      <div class="sb-wrap"><div class="sb" style="height:54px;background:#F76A3A"></div><span class="sb-lbl">Wed</span></div>
+      <div class="sb-wrap"><div class="sb" style="height:80px;background:#22C9A0"></div><span class="sb-lbl">Thu</span></div>
+      <div class="sb-wrap"><div class="sb" style="height:76px;background:#22C9A0"></div><span class="sb-lbl">Fri</span></div>
+      <div class="sb-wrap"><div class="sb" style="height:67px;background:#A259F7"></div><span class="sb-lbl">Sat</span></div>
+      <div class="sb-wrap"><div class="sb" style="height:72px;background:#A259F7"></div><span class="sb-lbl">Sun</span></div>
+    </div>
+    <div style="display:flex;gap:10px;font-size:10.5px;margin-top:4px;flex-wrap:wrap">
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#22C9A0;border-radius:2px;display:inline-block"></span>Good (7-9h)</span>
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#A259F7;border-radius:2px;display:inline-block"></span>Fair (6-7h)</span>
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#F76A3A;border-radius:2px;display:inline-block"></span>Poor (&lt;6h)</span>
+    </div>
+    <div class="mt12">
+      <div class="lbl">LOG TODAY'S SLEEP</div>
+      <div class="flex-row mt8">
+        <input type="number" class="inp" id="sleep-input" placeholder="Hours (e.g. 7.5)" step="0.5" min="0" max="12" inputmode="decimal" style="flex:1">
+        <button class="btn btn-primary btn-sm" onclick="logSleep()">Log Sleep</button>
+      </div>
+      <div id="sleep-result"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-ic" style="background:#FFF0E8">😊</div>
+      <div>
+        <div class="card-title">Today's Mood</div>
+        <div class="card-sub">Mental wellness check-in</div>
+      </div>
+    </div>
+    <div class="mood-row">
+      <button class="mood-btn" onclick="selectMood(this,'😞','Sad')"><div class="mood-em">😞</div><div class="mood-lbl">Sad</div></button>
+      <button class="mood-btn" onclick="selectMood(this,'😐','Neutral')"><div class="mood-em">😐</div><div class="mood-lbl">Neutral</div></button>
+      <button class="mood-btn" onclick="selectMood(this,'🙂','Good')"><div class="mood-em">🙂</div><div class="mood-lbl">Good</div></button>
+      <button class="mood-btn" onclick="selectMood(this,'😄','Great')"><div class="mood-em">😄</div><div class="mood-lbl">Great</div></button>
+      <button class="mood-btn" onclick="selectMood(this,'🤩','Amazing')"><div class="mood-em">🤩</div><div class="mood-lbl">Amazing</div></button>
+    </div>
+    <div id="mood-result"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-ic" style="background:#E6FAF4">🥗</div>
+      <div><div class="card-title">Nutrition Tips</div></div>
+    </div>
+    <div class="info-box green" style="margin-bottom:8px"><span class="info-box-ic">🌅</span><div><strong>Morning:</strong> Warm water + lemon first. Protein-rich breakfast — eggs, dal, paneer.</div></div>
+    <div class="info-box blue" style="margin-bottom:8px"><span class="info-box-ic">☀️</span><div><strong>Lunch:</strong> Half plate vegetables, quarter protein, quarter whole grains. Eat slowly.</div></div>
+    <div class="info-box yellow" style="margin-bottom:8px"><span class="info-box-ic">🌙</span><div><strong>Dinner:</strong> Keep light — soups, salads, or khichdi. Eat 2-3 hours before sleep.</div></div>
+    <div class="info-box red" style="margin-bottom:0"><span class="info-box-ic">❌</span><div><strong>Avoid:</strong> Processed foods, excess salt, sugary drinks, fried snacks, late-night eating.</div></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  JAVASCRIPT -->
+<!-- ============================================================ -->
+<script>
+// ---- NAVIGATION ----
+const SECS = ['dashboard','heart','bmi','steps','exercise','aidoctor','wellness'];
+
+function showSec(id) {
+  SECS.forEach(s => {
+    document.getElementById(s).classList.remove('active');
+    document.getElementById('bnav-' + s).classList.remove('active');
+  });
+  document.getElementById(id).classList.add('active');
+  document.getElementById('bnav-' + id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ---- BP CHECKER ----
+function checkBP() {
+  const sys = parseInt(document.getElementById('bp-sys').value);
+  const dia = parseInt(document.getElementById('bp-dia').value);
+  const hr  = parseInt(document.getElementById('heart-rate').value);
+  const el  = document.getElementById('bp-result');
+
+  if (!sys || !dia) {
+    el.innerHTML = '<div class="res-badge bg-yellow" style="margin-top:10px">⚠️ Please enter both values</div>';
+    return;
+  }
+
+  let cls, label, advice, hrInfo = '';
+  if (sys < 90 || dia < 60) {
+    cls='bg-yellow'; label='🔵 Low Blood Pressure';
+    advice='Your BP is low. Drink more fluids, a little more salt, avoid sudden standing. See a doctor if dizzy or faint.';
+  } else if (sys < 120 && dia < 80) {
+    cls='bg-green'; label='✅ Normal Blood Pressure';
+    advice='Excellent! Your BP is in the ideal range. Keep maintaining your healthy lifestyle.';
+  } else if (sys < 130 && dia < 80) {
+    cls='bg-yellow'; label='🟡 Elevated Blood Pressure';
+    advice='Slightly elevated. Reduce salt intake, exercise daily, manage stress, and avoid caffeine.';
+  } else if (sys < 140 || dia < 90) {
+    cls='bg-yellow'; label='🟠 High BP — Stage 1';
+    advice='Stage 1 hypertension. Lifestyle changes needed. Consult your doctor soon.';
+  } else if (sys < 180 || dia < 120) {
+    cls='bg-red'; label='🔴 High BP — Stage 2';
+    advice='Stage 2 hypertension. Please see a doctor soon. Medication may be needed alongside lifestyle changes.';
+  } else {
+    cls='bg-red'; label='🆘 Hypertensive Crisis!';
+    advice='DANGER: BP critically high! Call 112 or go to emergency immediately!';
+  }
+
+  if (hr) {
+    if (hr < 60)       hrInfo = `<br><br>💓 Heart Rate: ${hr} bpm — Slightly low. Normal if you're athletic, otherwise consult a doctor.`;
+    else if (hr <= 100) hrInfo = `<br><br>💓 Heart Rate: ${hr} bpm — ✅ Normal range.`;
+    else if (hr <= 120) hrInfo = `<br><br>💓 Heart Rate: ${hr} bpm — Slightly elevated. Rest and recheck.`;
+    else                hrInfo = `<br><br>💓 Heart Rate: ${hr} bpm — Very high. Rest immediately and seek medical advice.`;
+  }
+
+  el.innerHTML = `
+    <div class="res-badge ${cls}" style="margin-bottom:8px">${label}</div>
+    <div class="info-box blue" style="margin:0"><span class="info-box-ic">💬</span><div>${advice}${hrInfo}</div></div>
+  `;
+}
+
+// ---- BMI ----
+function calcBMI() {
+  const h = parseFloat(document.getElementById('bmi-height').value) / 100;
+  const w = parseFloat(document.getElementById('bmi-weight').value);
+
+  if (!h || !w) {
+    document.getElementById('bmi-result').innerHTML = '<div class="res-badge bg-yellow mt10">⚠️ Enter height and weight</div>';
+    return;
+  }
+
+  const bmi = (w / (h * h)).toFixed(1);
+  let cls, cat, advice, color;
+  if      (bmi < 18.5) { cls='bg-yellow'; cat='Underweight';    color='#74C6FF'; advice='Increase calorie intake with nutritious foods — nuts, dairy, protein, whole grains. Consult a nutritionist.'; }
+  else if (bmi < 25)   { cls='bg-green';  cat='Normal Weight ✅'; color='#4ACA8A'; advice='Your BMI is in the healthy range! Maintain your current diet and exercise routine.'; }
+  else if (bmi < 30)   { cls='bg-yellow'; cat='Overweight';      color='#F9C74F'; advice='Reduce calorie intake, avoid processed foods, and increase physical activity to 45 min/day.'; }
+  else if (bmi < 35)   { cls='bg-red';    cat='Obese Class I';   color='#F76A3A'; advice='Health risks elevated. Please consult a doctor and nutritionist for a structured weight loss plan.'; }
+  else                  { cls='bg-red';    cat='Obese Class II+'; color='#F74A4A'; advice='Severe obesity. High risk for diabetes, heart disease. Please see a doctor immediately.'; }
+
+  const minIdeal = (18.5 * h * h).toFixed(1);
+  const maxIdeal = (24.9 * h * h).toFixed(1);
+
+  document.getElementById('bmi-result').innerHTML = `
+    <div style="text-align:center;margin:14px 0 10px">
+      <div style="font-size:52px;font-weight:800;color:${color};line-height:1">${bmi}</div>
+      <div class="res-badge ${cls}" style="margin-top:8px">${cat}</div>
+    </div>
+    <div class="info-box blue" style="margin:0"><span class="info-box-ic">💬</span><div>${advice}</div></div>
+  `;
+
+  document.getElementById('ideal-weight').innerHTML = `
+    <div style="text-align:center;padding:8px">
+      <div class="fs12 c-text2">Your ideal weight range</div>
+      <div style="font-size:28px;font-weight:800;color:var(--accent2);margin:6px 0">${minIdeal} – ${maxIdeal} kg</div>
+      <div class="fs11 c-text2">For height ${(h*100).toFixed(0)} cm</div>
+    </div>
+  `;
+}
+
+// ---- STEPS ----
+function updateSteps() {
+  const val = parseInt(document.getElementById('steps-input').value);
+  if (!val || val < 0) return;
+  const pct = Math.min(100, Math.round(val / 100));
+  document.getElementById('steps-count').textContent = val.toLocaleString();
+  document.getElementById('steps-bar').style.width = Math.min(100, val / 10000 * 100) + '%';
+  document.getElementById('steps-pct').textContent = Math.min(100, Math.round(val / 10000 * 100)) + '% of goal';
+  document.getElementById('dash-steps').textContent = val.toLocaleString();
+  document.getElementById('steps-input').value = '';
+}
+
+// ---- EXERCISE FILTER ----
+function filterEx(cat, btn) {
+  document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.ex-card').forEach(c => {
+    c.style.display = (cat === 'all' || c.dataset.cat === cat) ? 'block' : 'none';
+  });
+}
+
+function toggleEx(hd) {
+  const body   = hd.nextElementSibling;
+  const arrow  = hd.querySelector('.ex-arrow');
+  const isOpen = body.classList.contains('open');
+  document.querySelectorAll('.ex-body').forEach(b => b.classList.remove('open'));
+  document.querySelectorAll('.ex-arrow').forEach(a => a.classList.remove('open'));
+  if (!isOpen) { body.classList.add('open'); arrow.classList.add('open'); }
+}
+
+// ---- WATER ----
+let waterCount = 5;
+(function initWater() {
+  const grid = document.getElementById('water-grid');
+  for (let i = 0; i < 8; i++) {
+    const g = document.createElement('div');
+    g.className = 'w-glass' + (i < waterCount ? ' filled' : '');
+    g.innerHTML = '<div class="w-fill"></div><span class="w-em">💧</span>';
+    g.onclick = () => toggleWater(i);
+    grid.appendChild(g);
+  }
+})();
+
+function toggleWater(idx) {
+  const glasses = document.querySelectorAll('.w-glass');
+  const wasFilled = glasses[idx].classList.contains('filled');
+  glasses.forEach((g, i) => g.classList.toggle('filled', wasFilled ? i < idx : i <= idx));
+  waterCount = document.querySelectorAll('.w-glass.filled').length;
+  document.getElementById('water-count').textContent = waterCount + ' / 8 glasses';
+  document.getElementById('water-bar').style.width = (waterCount / 8 * 100) + '%';
+  document.getElementById('dash-water').textContent = waterCount + '/8';
+}
+
+// ---- SLEEP ----
+function logSleep() {
+  const h = parseFloat(document.getElementById('sleep-input').value);
+  const el = document.getElementById('sleep-result');
+  if (!h) return;
+  let msg, cls;
+  if      (h < 6)  { msg = `⚠️ Only ${h}h — Too little sleep. Aim for 7–9 hours.`;       cls='bg-red'; }
+  else if (h < 7)  { msg = `🟡 ${h}h — Below optimal. Try to get 7–9 hours.`;             cls='bg-yellow'; }
+  else if (h <= 9) { msg = `✅ ${h}h — Excellent! You slept the recommended amount.`;     cls='bg-green'; }
+  else             { msg = `ℹ️ ${h}h — Oversleeping. Maintain a regular sleep schedule.`;  cls='bg-blue'; }
+  el.innerHTML = `<div class="res-badge ${cls}" style="margin-top:8px">${msg}</div>`;
+  document.getElementById('sleep-input').value = '';
+}
+
+// ---- MOOD ----
+function selectMood(el, emoji, label) {
+  document.querySelectorAll('.mood-btn').forEach(b => b.style.background = 'transparent');
+  el.style.background = 'var(--surface2)';
+  const tips = {
+    Sad:     'Take a short walk outside, call a friend, or try 5 minutes of deep breathing. It gets better. 💙',
+    Neutral: 'A neutral day is fine! Try something small that brings you joy today. 🌿',
+    Good:    'Great to hear! Keep the positive energy going — maybe do a short workout? 💪',
+    Great:   'Wonderful! Great mood boosts immunity. Keep it up! 🌟',
+    Amazing: 'You\'re thriving! Spread the positivity to someone around you today! 🌈'
+  };
+  document.getElementById('mood-result').innerHTML =
+    `<div class="info-box green" style="margin-top:8px;margin-bottom:0"><span class="info-box-ic">${emoji}</span><div>${tips[label]}</div></div>`;
+}
+
+// ---- AI DOCTOR CHAT ----
+const SYS = `You are Dr. AI, a compassionate AI health assistant built into the HealthPulse app. Help users understand blood pressure, heart rate, BMI, steps, and symptoms.
+
+Rules:
+- Warm, doctor-like tone. Practical, actionable advice.
+- For BP: explain ranges clearly.
+- For symptoms: explain possible causes but always recommend seeing a real doctor for diagnosis.
+- For emergencies (chest pain, severe headache, difficulty breathing, stroke signs): ALWAYS tell them to call 112 immediately — this is the emergency number in India.
+- Keep responses concise (2-4 sentences usually). Use emojis sparingly.
+- Always suggest a next step.
+- NEVER diagnose definitively — say "this could indicate" or "consistent with".
+- Remind users you are an AI and they should consult a real doctor for medical decisions.`;
+
+function getTime() {
+  return new Date().toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'});
+}
+
+function addMsg(text, isUser) {
+  const msgs = document.getElementById('chat-messages');
+  const d = document.createElement('div');
+  d.className = 'msg' + (isUser ? ' user' : '');
+  d.innerHTML = `
+    <div class="msg-av">${isUser ? '👤' : '👨‍⚕️'}</div>
+    <div>
+      <div class="msg-bub">${text.replace(/\n/g,'<br>')}</div>
+      <div class="msg-time">${getTime()}</div>
+    </div>
+  `;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addTyping() {
+  const msgs = document.getElementById('chat-messages');
+  const d = document.createElement('div');
+  d.className = 'msg'; d.id = 'typing';
+  d.innerHTML = `<div class="msg-av">👨‍⚕️</div><div class="typing-bub"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div>`;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById('typing');
+  if (t) t.remove();
+}
+
+let chatHistory = [];
+
+async function sendMessage(text) {
+  const inp = document.getElementById('chat-input');
+  const msg = text || inp.value.trim();
+  if (!msg) return;
+  inp.value = ''; inp.style.height = 'auto';
+  addMsg(msg, true);
+  chatHistory.push({ role:'user', content:msg });
+  addTyping();
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:1000,
+        system: SYS,
+        messages: chatHistory
+      })
+    });
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || "I couldn't process that. Please try again.";
+    removeTyping();
+    addMsg(reply, false);
+    chatHistory.push({ role:'assistant', content:reply });
+  } catch(e) {
+    removeTyping();
+    addMsg("Connection issue. Please check your internet. For emergencies call 112 🚨", false);
+  }
+}
+
+function quickQ(btn) { sendMessage(btn.textContent); }
+
+function chatKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+document.getElementById('chat-input').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 80) + 'px';
+});
+</script>
+</body>
+</html>
