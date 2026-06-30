@@ -202,6 +202,11 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .chat-input-row input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:50px;background:var(--card);color:var(--text);outline:none}
 .chat-input-row input:focus{border-color:var(--primary)}
 .quick-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.typing-dots{display:inline-flex;gap:3px;align-items:center;padding:4px 0}
+.typing-dots span{width:6px;height:6px;border-radius:50%;background:var(--text-muted);animation:typingBlink 1.2s infinite ease-in-out}
+.typing-dots span:nth-child(2){animation-delay:.2s}
+.typing-dots span:nth-child(3){animation-delay:.4s}
+@keyframes typingBlink{0%,80%,100%{opacity:.3}40%{opacity:1}}
 
 /* ===== TIPS ===== */
 .tip-card{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border-radius:var(--radius);padding:18px;margin-bottom:12px}
@@ -676,7 +681,6 @@ let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  // Show install banner after 3 seconds if not already installed
   setTimeout(() => {
     if(!window.matchMedia('(display-mode: standalone)').matches){
       document.getElementById('installBanner').classList.add('show');
@@ -698,7 +702,6 @@ function dismissInstall(){
   localStorage.setItem('hp_install_dismissed','1');
 }
 
-// Hide banner if already installed as PWA
 window.addEventListener('appinstalled', () => {
   document.getElementById('installBanner').classList.remove('show');
 });
@@ -775,22 +778,45 @@ const TIPS=[
 
 const ALL_TIPS=TIPS.flatMap(t=>t.items);
 
+/* ===================================================================
+   AI KNOWLEDGE BASE (advanced — expanded topics + scoring engine)
+=================================================================== */
 const AI_KB=[
-  {k:["weight loss","lose weight","slim","fat loss","motapa","vajan kam"],r:"🥗 Weight Loss Plan:\n\n🍽️ Diet:\n• Eat 300–500 fewer calories than you burn daily\n• Focus on: vegetables, dal, lean protein, fruits\n• Avoid: sugar, fried food, maida, cold drinks\n• Eat slowly and stop when 80% full\n\n🏃 Exercise:\n• Walk 30–45 min daily (morning best)\n• Add 3 days/week strength training\n• Try cycling or swimming for variety\n\n💡 Lifestyle:\n• Drink 8–10 glasses water daily\n• Sleep 7–9 hours — poor sleep increases hunger hormones\n• Eat 5–6 small meals instead of 3 large ones\n\nSafe target: 0.5–1 kg per week."},
-  {k:["weight gain","gain weight","bulk","underweight","dubla","patla","vajan badhana"],r:"💪 Weight Gain Plan:\n\n🍽️ Diet:\n• Eat 300–500 more calories than you burn\n• High protein foods: milk, eggs, paneer, chicken, dal\n• High calorie healthy foods: banana, dry fruits, peanut butter, ghee\n• Eat every 3 hours — 5–6 meals per day\n\n🏋️ Exercise:\n• Strength training 3–4 times/week\n• Focus on compound exercises: squats, deadlifts, bench press\n• Limit cardio — it burns too many calories\n\n😴 Rest:\n• Sleep 8 hours — muscles grow during sleep\n• Take 1–2 rest days per week\n\nTarget: 0.25–0.5 kg gain per week (clean bulk)."},
-  {k:["water","hydrate","pani","thirst","dehydrate"],r:"💧 Daily Water Intake:\n\nAdults: 8–10 glasses (2–2.5 liters) per day.\n\nDrink more if you:\n• Exercise or sweat heavily\n• Live in hot/humid weather\n• Are pregnant or breastfeeding\n• Eat salty or spicy food\n\n🕐 Best times:\n• 1–2 glasses right after waking up\n• 1 glass 30 min before each meal\n• 1 glass after exercise\n• Small sips throughout the day\n\n⚠️ Signs of dehydration: dark yellow urine, headache, fatigue, dry mouth."},
+  {k:["weight loss","lose weight","slim","fat loss","motapa","vajan kam","ghatana","weight kam","pet kam"],r:"🥗 Weight Loss Plan:\n\n🍽️ Diet:\n• Eat 300–500 fewer calories than you burn daily\n• Focus on: vegetables, dal, lean protein, fruits\n• Avoid: sugar, fried food, maida, cold drinks\n• Eat slowly and stop when 80% full\n\n🏃 Exercise:\n• Walk 30–45 min daily (morning best)\n• Add 3 days/week strength training\n• Try cycling or swimming for variety\n\n💡 Lifestyle:\n• Drink 8–10 glasses water daily\n• Sleep 7–9 hours — poor sleep increases hunger hormones\n• Eat 5–6 small meals instead of 3 large ones\n\nSafe target: 0.5–1 kg per week."},
+  {k:["weight gain","gain weight","bulk","underweight","dubla","patla","vajan badhana","weight badhana"],r:"💪 Weight Gain Plan:\n\n🍽️ Diet:\n• Eat 300–500 more calories than you burn\n• High protein foods: milk, eggs, paneer, chicken, dal\n• High calorie healthy foods: banana, dry fruits, peanut butter, ghee\n• Eat every 3 hours — 5–6 meals per day\n\n🏋️ Exercise:\n• Strength training 3–4 times/week\n• Focus on compound exercises: squats, deadlifts, bench press\n• Limit cardio — it burns too many calories\n\n😴 Rest:\n• Sleep 8 hours — muscles grow during sleep\n• Take 1–2 rest days per week\n\nTarget: 0.25–0.5 kg gain per week (clean bulk)."},
+  {k:["water","hydrate","pani","thirst","dehydrate","kitna pani"],r:"💧 Daily Water Intake:\n\nAdults: 8–10 glasses (2–2.5 liters) per day.\n\nDrink more if you:\n• Exercise or sweat heavily\n• Live in hot/humid weather\n• Are pregnant or breastfeeding\n• Eat salty or spicy food\n\n🕐 Best times:\n• 1–2 glasses right after waking up\n• 1 glass 30 min before each meal\n• 1 glass after exercise\n• Small sips throughout the day\n\n⚠️ Signs of dehydration: dark yellow urine, headache, fatigue, dry mouth."},
   {k:["breakfast","morning meal","subah ka khana","nashta"],r:"🌅 Healthy Breakfast Ideas:\n\n✅ Quick & Nutritious:\n• Oats porridge with banana, seeds, and honey\n• 2 idli + sambar + chutney\n• Poha with vegetables and lemon\n• Upma with vegetables\n• 2 boiled eggs + whole wheat toast\n• Dalia (broken wheat) with milk and dry fruits\n• Moong dal chilla with chutney\n\n❌ Avoid:\n• White bread with jam/butter\n• Sweet cereals, biscuits\n• Parathas with lots of butter/ghee\n• Skipping breakfast entirely\n\n💡 Eat within 1 hour of waking for best metabolism."},
-  {k:["yoga","back pain","back","spine","kamar","kamar dard"],r:"🧘 Yoga for Back Pain:\n\n1. Bhujangasana (Cobra) — strengthens back muscles\n2. Balasana (Child's Pose) — relieves lower back tension\n3. Cat-Cow Stretch — improves spine flexibility\n4. Tadasana (Mountain Pose) — corrects posture\n5. Vajrasana — relaxes lower back after meals\n6. Supine Twist — releases spinal tension\n\n⏱️ Practice gently for 10–15 min daily.\n💡 Avoid jerky or forceful movements.\n⚠️ See a doctor if pain is severe, radiates to legs, or follows an injury."},
-  {k:["sleep","insomnia","neend","rest","tired","nahi so raha"],r:"😴 How to Improve Sleep:\n\n🕐 Routine:\n• Sleep and wake at same time daily (even weekends)\n• Get 7–9 hours of sleep\n\n📱 Before Bed:\n• No phone/screen 1 hour before sleep\n• Avoid heavy meals within 3 hours of sleep\n• No caffeine (tea/coffee/cola) after 2 PM\n\n🛏️ Environment:\n• Keep room cool (18–22°C ideal), dark, and quiet\n• Use white noise or earplugs if noisy\n\n🧘 Wind Down:\n• 5–10 min meditation or deep breathing\n• Read a book (physical, not screen)\n• Light stretching or yoga before bed\n\n⚠️ See a doctor if insomnia lasts more than 3 weeks."},
+  {k:["yoga for back","back pain","back","spine","kamar","kamar dard"],r:"🧘 Yoga for Back Pain:\n\n1. Bhujangasana (Cobra) — strengthens back muscles\n2. Balasana (Child's Pose) — relieves lower back tension\n3. Cat-Cow Stretch — improves spine flexibility\n4. Tadasana (Mountain Pose) — corrects posture\n5. Vajrasana — relaxes lower back after meals\n6. Supine Twist — releases spinal tension\n\n⏱️ Practice gently for 10–15 min daily.\n💡 Avoid jerky or forceful movements.\n⚠️ See a doctor if pain is severe, radiates to legs, or follows an injury."},
+  {k:["sleep","insomnia","neend","rest","tired","nahi so raha","neend nahi"],r:"😴 How to Improve Sleep:\n\n🕐 Routine:\n• Sleep and wake at same time daily (even weekends)\n• Get 7–9 hours of sleep\n\n📱 Before Bed:\n• No phone/screen 1 hour before sleep\n• Avoid heavy meals within 3 hours of sleep\n• No caffeine (tea/coffee/cola) after 2 PM\n\n🛏️ Environment:\n• Keep room cool (18–22°C ideal), dark, and quiet\n• Use white noise or earplugs if noisy\n\n🧘 Wind Down:\n• 5–10 min meditation or deep breathing\n• Read a book (physical, not screen)\n• Light stretching or yoga before bed\n\n⚠️ See a doctor if insomnia lasts more than 3 weeks."},
   {k:["exercise","workout","beginner","gym","shuru karna","fitness","vyayam"],r:"💪 Beginner Exercise Plan (4 Weeks):\n\nWeek 1–2 (Start Easy):\n• 20–30 min brisk walk daily\n• 10 push-ups, 15 squats, 20-sec plank × 2 sets\n• Rest every alternate day\n\nWeek 3–4 (Build Up):\n• 30 min walk/jog\n• 3 sets: push-ups (12), squats (20), plank (30 sec)\n• Add jumping jacks as warmup\n\n💡 Rules:\n• Always warm up 5 min before\n• Stretch 5–10 min after every session\n• Drink water before and after\n• Sleep 7–8 hours for recovery\n• Consistency > intensity for beginners"},
-  {k:["stress","anxiety","tension","depression","sad","maan","mental"],r:"🧠 Managing Stress & Anxiety:\n\n🫁 Breathing (works in 60 seconds):\n• Inhale 4 sec → Hold 4 sec → Exhale 6 sec\n• Repeat 5–10 times\n\n🧘 Daily Habits:\n• Meditate 5–10 min each morning\n• Walk in nature 20–30 min\n• Limit news and social media\n• Write down worries in a journal\n• Practice gratitude: 3 good things daily\n\n👥 Connection:\n• Talk to a trusted friend or family member\n• Spend quality time with loved ones\n• Avoid isolation\n\n⚠️ Seek professional help if you feel persistently sad, hopeless, or unable to function."},
-  {k:["diabetes","blood sugar","sugar","madhumeh"],r:"🩸 Managing Blood Sugar (General Tips):\n\n🍽️ Diet:\n• Eat low glycemic foods: oats, brown rice, vegetables, dal, lentils\n• Avoid: white rice, maida, sweets, sugar, fruit juices, cold drinks\n• Eat small meals every 3–4 hours\n• Include fenugreek (methi), bitter gourd (karela), and cinnamon in diet\n\n🏃 Exercise:\n• 30 min walk after meals helps lower blood sugar\n• Regular exercise improves insulin sensitivity\n\n📋 Monitor:\n• Check blood sugar regularly\n• Take prescribed medications on time\n• Get HbA1c tested every 3 months\n\n⚠️ Consult your doctor for personalized diabetes management."},
-  {k:["protein","muscle","strength","bodybuilding"],r:"💪 Protein Guide:\n\nHow much protein?\n• Sedentary adult: 0.8g per kg body weight\n• Active person: 1.2–1.6g per kg\n• Bodybuilder: 1.6–2.2g per kg\n\n🥚 Best Indian Protein Sources:\n• Eggs: 6–7g each\n• Paneer: 18g per 100g\n• Chicken breast: 25g per 100g\n• Dal/lentils: 9g per cooked cup\n• Milk: 8g per 250ml glass\n• Curd: 10g per 100g\n• Soya chunks: 52g per 100g (dry)\n• Peanuts: 26g per 100g\n\n💡 Spread protein across all meals for best absorption."},
-  {k:["immunity","immune","cold","cough","bukhar","bimari"],r:"🛡️ Boost Your Immunity:\n\n🥗 Foods that help:\n• Citrus fruits: orange, lemon, amla (Vitamin C)\n• Garlic, ginger, turmeric — powerful natural antibiotics\n• Spinach, broccoli, bell peppers\n• Nuts and seeds for Zinc and Vitamin E\n• Dahi/curd for gut health (probiotics)\n\n🏃 Lifestyle:\n• Exercise moderately 30 min most days\n• Sleep 7–9 hours — immune cells regenerate during sleep\n• Manage stress — cortisol weakens immunity\n• Quit smoking\n\n💡 Golden milk: warm milk + turmeric + black pepper + ginger — excellent immune booster."},
+  {k:["stress","anxiety","tension","depression","sad","maan","mental","pareshan"],r:"🧠 Managing Stress & Anxiety:\n\n🫁 Breathing (works in 60 seconds):\n• Inhale 4 sec → Hold 4 sec → Exhale 6 sec\n• Repeat 5–10 times\n\n🧘 Daily Habits:\n• Meditate 5–10 min each morning\n• Walk in nature 20–30 min\n• Limit news and social media\n• Write down worries in a journal\n• Practice gratitude: 3 good things daily\n\n👥 Connection:\n• Talk to a trusted friend or family member\n• Spend quality time with loved ones\n• Avoid isolation\n\n⚠️ Seek professional help if you feel persistently sad, hopeless, or unable to function."},
+  {k:["diabetes","blood sugar","sugar disease","madhumeh"],r:"🩸 Managing Blood Sugar (General Tips):\n\n🍽️ Diet:\n• Eat low glycemic foods: oats, brown rice, vegetables, dal, lentils\n• Avoid: white rice, maida, sweets, sugar, fruit juices, cold drinks\n• Eat small meals every 3–4 hours\n• Include fenugreek (methi), bitter gourd (karela), and cinnamon in diet\n\n🏃 Exercise:\n• 30 min walk after meals helps lower blood sugar\n• Regular exercise improves insulin sensitivity\n\n📋 Monitor:\n• Check blood sugar regularly\n• Take prescribed medications on time\n• Get HbA1c tested every 3 months\n\n⚠️ Consult your doctor for personalized diabetes management."},
+  {k:["protein","muscle gain","strength training","bodybuilding","muscle"],r:"💪 Protein Guide:\n\nHow much protein?\n• Sedentary adult: 0.8g per kg body weight\n• Active person: 1.2–1.6g per kg\n• Bodybuilder: 1.6–2.2g per kg\n\n🥚 Best Indian Protein Sources:\n• Eggs: 6–7g each\n• Paneer: 18g per 100g\n• Chicken breast: 25g per 100g\n• Dal/lentils: 9g per cooked cup\n• Milk: 8g per 250ml glass\n• Curd: 10g per 100g\n• Soya chunks: 52g per 100g (dry)\n• Peanuts: 26g per 100g\n\n💡 Spread protein across all meals for best absorption."},
+  {k:["immunity","immune","cold","cough","bukhar","bimari","rog pratirodhak"],r:"🛡️ Boost Your Immunity:\n\n🥗 Foods that help:\n• Citrus fruits: orange, lemon, amla (Vitamin C)\n• Garlic, ginger, turmeric — powerful natural antibiotics\n• Spinach, broccoli, bell peppers\n• Nuts and seeds for Zinc and Vitamin E\n• Dahi/curd for gut health (probiotics)\n\n🏃 Lifestyle:\n• Exercise moderately 30 min most days\n• Sleep 7–9 hours — immune cells regenerate during sleep\n• Manage stress — cortisol weakens immunity\n• Quit smoking\n\n💡 Golden milk: warm milk + turmeric + black pepper + ginger — excellent immune booster."},
   {k:["bmi","body mass","height weight","ideal weight"],r:"⚖️ BMI (Body Mass Index):\n\nFormula: BMI = Weight(kg) ÷ Height²(m)\n\nCategories:\n• Below 18.5 = Underweight\n• 18.5–24.9 = Normal / Healthy ✅\n• 25–29.9 = Overweight\n• 30–34.9 = Obese (Class I)\n• 35+ = Severely Obese\n\n💡 Use our BMI Calculator (⚖️ tab) for your exact result and personalised health tips."},
-  {k:["cholesterol","heart","bp","blood pressure","heart attack","dil"],r:"❤️ Heart Health Tips:\n\n🍽️ Diet:\n• Eat more: oats, fruits, vegetables, fish, nuts, olive oil\n• Limit: red meat, full-fat dairy, fried food, salt\n• Avoid: trans fats, processed food, excess sugar\n\n🏃 Exercise:\n• 30 min cardio (walking, cycling, swimming) 5 days/week\n\n🚭 Lifestyle:\n• Quit smoking — biggest heart risk factor\n• Manage stress (yoga, meditation)\n• Maintain healthy weight\n• Sleep 7–9 hours\n\n📋 Monitor: Get BP, cholesterol checked annually.\n⚠️ Chest pain, arm/jaw pain, shortness of breath = call emergency immediately."},
-  {k:["digestion","constipation","stomach","gas","acidity","pet dard","kabz"],r:"🫃 Digestive Health Tips:\n\nFor Constipation:\n• Drink 8–10 glasses water daily\n• Eat high-fiber foods: fruits, vegetables, oats, brown rice\n• Walk 10–15 min after meals\n\nFor Acidity (GERD):\n• Eat smaller, more frequent meals\n• Avoid: spicy food, coffee, alcohol, cold drinks\n• Don't lie down right after eating — wait 2–3 hours\n• Drink cold milk or eat banana for quick relief\n\nFor Gas / Bloating:\n• Eat slowly, chew thoroughly\n• Avoid carbonated drinks\n• Vajrasana (yoga) after meals helps greatly\n• Try ajwain (carom seeds) with warm water\n\n⚠️ See a doctor for persistent digestive issues."}
+  {k:["cholesterol","heart health","bp","blood pressure","heart attack","dil","high bp","low bp"],r:"❤️ Heart Health Tips:\n\n🍽️ Diet:\n• Eat more: oats, fruits, vegetables, fish, nuts, olive oil\n• Limit: red meat, full-fat dairy, fried food, salt\n• Avoid: trans fats, processed food, excess sugar\n\n🏃 Exercise:\n• 30 min cardio (walking, cycling, swimming) 5 days/week\n\n🚭 Lifestyle:\n• Quit smoking — biggest heart risk factor\n• Manage stress (yoga, meditation)\n• Maintain healthy weight\n• Sleep 7–9 hours\n\n📋 Monitor: Get BP, cholesterol checked annually.\n⚠️ Chest pain, arm/jaw pain, shortness of breath = call emergency immediately."},
+  {k:["digestion","constipation","stomach","gas problem","acidity","pet dard","kabz","badhazmi"],r:"🫃 Digestive Health Tips:\n\nFor Constipation:\n• Drink 8–10 glasses water daily\n• Eat high-fiber foods: fruits, vegetables, oats, brown rice\n• Walk 10–15 min after meals\n\nFor Acidity (GERD):\n• Eat smaller, more frequent meals\n• Avoid: spicy food, coffee, alcohol, cold drinks\n• Don't lie down right after eating — wait 2–3 hours\n• Drink cold milk or eat banana for quick relief\n\nFor Gas / Bloating:\n• Eat slowly, chew thoroughly\n• Avoid carbonated drinks\n• Vajrasana (yoga) after meals helps greatly\n• Try ajwain (carom seeds) with warm water\n\n⚠️ See a doctor for persistent digestive issues."},
+  {k:["skin","skin care","glowing skin","pimple","acne","face","muhase","skin glow"],r:"✨ Skin Care Tips:\n\n🥗 Diet:\n• Drink 8+ glasses of water daily\n• Eat Vitamin C rich foods: orange, amla, lemon\n• Include nuts and seeds for healthy fats (Vitamin E)\n• Limit sugar and fried/oily food — major acne triggers\n\n🧴 Routine:\n• Cleanse face twice daily with mild face wash\n• Always use sunscreen (SPF 30+) during day\n• Never sleep with makeup on\n• Moisturize after every wash\n\nFor Acne:\n• Avoid touching/picking face\n• Wash pillow covers regularly\n• Use non-comedogenic products\n\n⚠️ See a dermatologist for severe or persistent acne/skin issues."},
+  {k:["hair","hair fall","baldness","dandruff","baal","baal jhadna","hair loss"],r:"💇 Hair Care Tips:\n\n🥗 Diet for healthy hair:\n• Protein-rich foods: eggs, dal, paneer, fish\n• Iron-rich foods: spinach, beetroot, pomegranate\n• Biotin sources: nuts, seeds, sweet potato\n• Drink enough water daily\n\n🧴 Routine:\n• Oil hair 2x/week (coconut or almond oil) and massage scalp\n• Wash hair 2–3 times/week with mild shampoo\n• Avoid tight hairstyles and excessive heat styling\n• Don't brush wet hair roughly — use wide-tooth comb\n\nFor Hair Fall:\n• Manage stress — major cause of hair fall\n• Check for thyroid/iron deficiency if hair fall is excessive\n• Avoid frequent chemical treatments\n\n⚠️ Consult a dermatologist if hair fall is sudden or severe (handfuls daily)."},
+  {k:["thyroid","hypothyroid","hyperthyroid"],r:"🦋 Thyroid Health (General Info):\n\nCommon symptoms:\n• Hypothyroid: fatigue, weight gain, cold sensitivity, hair fall\n• Hyperthyroid: weight loss, fast heartbeat, anxiety, sweating\n\n🍽️ Diet tips:\n• Include iodine: iodized salt, dairy\n• Selenium-rich foods: nuts, seeds\n• Avoid excess raw cruciferous veggies (cabbage, broccoli) if hypothyroid\n• Eat regular balanced meals\n\n🏃 Lifestyle:\n• Regular moderate exercise helps regulate metabolism\n• Manage stress — it affects thyroid hormones\n• Get adequate sleep\n\n⚠️ Thyroid problems need blood tests (TSH) and a doctor's diagnosis — don't self-medicate."},
+  {k:["pregnancy","pregnant","garbhwati","prenatal"],r:"🤰 Pregnancy Wellness (General Tips):\n\n🍽️ Diet:\n• Increase folic acid, iron, calcium intake\n• Eat small frequent balanced meals\n• Include dairy, dal, leafy greens, fruits\n• Avoid raw/undercooked food, excess caffeine, alcohol\n\n🏃 Activity:\n• Light walking and prenatal yoga (with doctor approval)\n• Avoid high-impact or risky exercises\n\n😴 Rest:\n• Sleep on left side in later trimesters for better blood flow\n• Rest when tired, avoid overexertion\n\n⚠️ This is general information only — always follow your gynecologist's specific advice and prenatal checkups."},
+  {k:["child nutrition","baby diet","kids food","bacho ka khana","child health"],r:"🧒 Child Nutrition Basics:\n\n🍽️ Key foods:\n• Milk and dairy for calcium and growth\n• Eggs, dal, paneer for protein\n• Fruits and vegetables for vitamins\n• Whole grains for energy\n\n💡 Tips:\n• Avoid excess sugar, packaged snacks, and soft drinks\n• Encourage outdoor play 1+ hour daily\n• Ensure 9–11 hours of sleep for school-age children\n• Make meals colorful and fun to encourage healthy eating\n\n⚠️ Consult a pediatrician for specific growth, weight, or nutrition concerns."},
+  {k:["vitamin d","vitamin deficiency","vitamin b12","calcium deficiency","weakness"],r:"💊 Common Vitamin Deficiencies:\n\nVitamin D:\n• Sources: sunlight (10–20 min daily), eggs, fortified milk\n• Low levels cause bone pain, fatigue, weak immunity\n\nVitamin B12:\n• Sources: dairy, eggs, meat (common deficiency in vegetarians)\n• Low levels cause fatigue, tingling, memory issues\n\nIron:\n• Sources: spinach, jaggery, pomegranate, dates\n• Low levels cause fatigue, paleness, breathlessness\n\nCalcium:\n• Sources: milk, curd, paneer, sesame seeds\n• Important for bones and teeth\n\n⚠️ Get a blood test to confirm any deficiency before taking supplements."},
+  {k:["eye","eyes","vision","eye care","aankh"],r:"👁️ Eye Care Tips:\n\n• Follow the 20-20-20 rule: every 20 min, look 20 feet away for 20 sec\n• Keep screens at eye level, arm's length away\n• Blink often to avoid dryness while using screens\n• Eat carrots, spinach, amla — rich in Vitamin A & C\n• Get a comprehensive eye check-up once a year\n• Wear sunglasses with UV protection outdoors\n• Avoid rubbing eyes; use clean water to wash if irritated\n\n⚠️ See an eye doctor immediately for sudden vision changes, pain, or redness."},
+  {k:["joint pain","knee pain","arthritis","ghutno me dard","jodo ka dard"],r:"🦴 Joint Pain Management Tips:\n\n🍽️ Diet:\n• Anti-inflammatory foods: turmeric, ginger, fish, nuts\n• Calcium and Vitamin D rich foods for bone strength\n• Maintain healthy weight to reduce joint load\n\n🏃 Activity:\n• Low-impact exercise: swimming, walking, cycling\n• Gentle stretching and yoga (Tadasana, Vrikshasana)\n• Avoid high-impact activities during flare-ups\n\n💡 Other tips:\n• Warm compress for stiffness, cold compress for swelling\n• Maintain good posture\n\n⚠️ Persistent or severe joint pain needs evaluation by an orthopedic doctor."},
+  {k:["headache","migraine","sar dard"],r:"🤕 Headache Relief Tips:\n\n• Stay hydrated — dehydration is a common trigger\n• Take a break from screens, rest eyes\n• Practice deep breathing or short meditation\n• Ensure regular sleep — too little or too much can trigger headaches\n• Avoid skipping meals — low blood sugar can cause headaches\n• Gentle neck and shoulder stretches can relieve tension headaches\n• Reduce caffeine intake gradually rather than suddenly\n\n⚠️ See a doctor for frequent, severe, or sudden-onset headaches, or ones with vision changes."},
+  {k:["quit smoking","smoking","cigarette","tambaku","alcohol","sharab","drinking"],r:"🚭 Quitting Smoking / Reducing Alcohol:\n\nSmoking:\n• Set a quit date and remove triggers (lighters, ashtrays)\n• Identify and avoid your smoking triggers\n• Use nicotine replacement (gum/patch) if needed — consult doctor\n• Stay busy, chew gum, or go for a walk during cravings\n\nAlcohol:\n• Set clear limits and track your drinks\n• Avoid keeping alcohol at home\n• Replace with non-alcoholic alternatives at social events\n• Identify and manage stress without alcohol\n\n💡 Both habits significantly raise health risks — support groups and doctors can greatly help with quitting."},
+  {k:["pcos","pcod","periods","menstrual","irregular periods"],r:"🌸 PCOS/PCOD & Menstrual Health (General Tips):\n\n🍽️ Diet:\n• Low glycemic index foods: whole grains, vegetables\n• Reduce sugar, processed food, and refined carbs\n• Include protein and healthy fats in every meal\n\n🏃 Exercise:\n• Regular exercise (30 min, 5 days/week) helps regulate hormones\n• Strength training can improve insulin sensitivity\n\n💡 Lifestyle:\n• Manage stress — it impacts hormone balance\n• Maintain consistent sleep schedule\n• Track your cycle to identify patterns\n\n⚠️ PCOS/PCOD needs proper diagnosis and management by a gynecologist."},
+  {k:["fever","cold and cough","flu","viral"],r:"🤒 Managing Fever, Cold & Cough (General Care):\n\n• Rest as much as possible, stay hydrated\n• Warm fluids: soup, herbal tea, warm water with honey\n• Steam inhalation helps with congestion\n• Gargle with warm salt water for sore throat\n• Keep room ventilated, avoid AC directly on body\n\n⚠️ See a doctor if fever is above 102°F, lasts more than 3 days, or is accompanied by difficulty breathing, severe weakness, or chest pain."}
 ];
+
+const GREETINGS=/^(hi|hello|hey|namaste|namaskar|helo|hii|hiii|good morning|good evening|good afternoon)\b/;
+const THANKS=/\b(thank|shukriya|dhanyawad|thanku|thnx)\b/;
+const HOWAREYOU=/\b(how are you|aap kaise|tum kaisa|kya haal|kaise ho)\b/;
+
+const FOOD_FALLBACK=/\b(food|khana|khaana|meal|diet|nutrition)\b/;
+const EXERCISE_FALLBACK=/\b(exercise|workout|gym|fit)\b/;
+const YOGA_FALLBACK=/\b(yoga|meditation|mindfulness)\b/;
 
 /* ===================================================================
    STATE
@@ -800,7 +826,7 @@ let stepCount=parseInt(localStorage.getItem('hp_steps')||'0');
 let hrValue=parseInt(localStorage.getItem('hp_hr')||'0');
 let weightVal=parseFloat(localStorage.getItem('hp_weight')||'0');
 let sleepVal=parseFloat(localStorage.getItem('hp_sleep')||'0');
-let chatHistory=[{role:'bot',text:"Namaste! 🙏 Main aapka AI Health Assistant hoon.\n\nAap mujhse pooch sakte hain:\n• Weight loss ya gain diet\n• Exercise aur yoga tips\n• Sleep improve karne ke tarike\n• Skin, hair, heart health\n• Diabetes, thyroid, digestion\n• Aur bhi bahut kuch!\n\nKoi bhi health sawaal poochein! 😊"}];
+let chatHistory=[{role:'bot',text:"Namaste! 🙏 Main aapka AI Health Assistant hoon.\n\nAap mujhse pooch sakte hain:\n• Weight loss ya gain diet\n• Exercise aur yoga tips\n• Sleep, skin, hair, eye care\n• Diabetes, thyroid, heart, joint pain\n• Pregnancy, child nutrition, PCOS\n• Aur bhi bahut kuch!\n\nKoi bhi health sawaal poochein! 😊"}];
 let pedometerOn=false;let liveStepCount=0;let lastAcc=null;let stepThreshold=1.2;let lastStepTime=0;
 
 /* ===================================================================
@@ -1091,18 +1117,43 @@ function renderQuote(){
 }
 
 /* ===================================================================
-   AI HEALTH ASSISTANT
+   AI HEALTH ASSISTANT — advanced scoring-based matcher
 =================================================================== */
 function getAIResponse(q){
   const ql=q.toLowerCase().trim();
-  if(/^(hi|hello|hey|namaste|namaskar|helo|hii|hiii)/.test(ql))return"Namaste! 🙏 Main aapka AI Health Assistant hoon!\n\nAap koi bhi health sawaal pooch sakte hain:\n• Diet aur nutrition\n• Exercise aur yoga\n• Sleep, stress, skin, hair\n• Diabetes, thyroid, heart\n\nKya poochna chahte hain? 😊";
-  if(ql.includes('thank')||ql.includes('shukriya')||ql.includes('dhanyawad'))return"Bahut shukriya! 😊 Apna khayal rakhein. Healthy rahein, happy rahein! 💪\n\nKoi aur sawaal ho toh zaroor poochein! 🌟";
-  if(/how are you|aap kaise|tum kaisa|kya haal/.test(ql))return"Main bilkul theek hoon, shukriya poochne ke liye! 😄\n\nAur aap? Apni health ke baare mein kuch poochna hai? Main help karne ke liye taiyar hoon! 💪";
-  for(const e of AI_KB){if(e.k.some(kw=>ql.includes(kw)))return e.r;}
-  if(/food|khana|khaana|meal|diet|nutrition/.test(ql))return"🥗 Healthy diet ke liye:\n\n• Din mein 3 main meals + 2 snacks\n• Har meal mein protein shamil karein\n• Bahut saari vegetables aur fruits khayein\n• Refined sugar aur fried food kam karein\n• Pani khub piyein — din mein 8–10 glass\n\nKoi specific diet question hai? Batayein! 😊";
-  if(/exercise|workout|gym|fit/.test(ql))return"💪 Exercise ke liye basic advice:\n\n• Roz 30 min walk sab se achha shuru\n• Week mein 3 din strength training\n• Proper warmup aur cooldown zaroori hai\n• Consistency most important hai\n\nKoi specific exercise problem hai? Puchein! 🏃";
-  if(/yoga|meditation|mindfulness/.test(ql))return"🧘 Yoga aur meditation ke fayde:\n\n• Stress aur anxiety kam hoti hai\n• Flexibility aur balance improve hoti hai\n• Sleep better aati hai\n• Blood pressure control mein rehta hai\n\nHamara Yoga section mein 7 poses hain step-by-step instructions ke saath! ✨";
-  return"Yeh sawaal mere knowledge base mein nahi hai. 🤔\n\nLekin main in topics mein help kar sakta hoon:\n• Diet aur weight management\n• Exercise aur yoga\n• Sleep improvement\n• Stress management\n• Diabetes, thyroid, heart health\n• Skin, hair care\n• Digestion problems\n\nKoi specific topic batayein! 😊\n\n⚠️ Serious medical issues ke liye please qualified doctor se milein.";
+
+  if(GREETINGS.test(ql))return"Namaste! 🙏 Main aapka AI Health Assistant hoon!\n\nAap koi bhi health sawaal pooch sakte hain:\n• Diet aur nutrition\n• Exercise aur yoga\n• Sleep, skin, hair, eye care\n• Diabetes, thyroid, heart, joint pain\n\nKya poochna chahte hain? 😊";
+  if(THANKS.test(ql))return"Bahut shukriya! 😊 Apna khayal rakhein. Healthy rahein, happy rahein! 💪\n\nKoi aur sawaal ho toh zaroor poochein! 🌟";
+  if(HOWAREYOU.test(ql))return"Main bilkul theek hoon, shukriya poochne ke liye! 😄\n\nAur aap? Apni health ke baare mein kuch poochna hai? Main help karne ke liye taiyar hoon! 💪";
+
+  // Scoring engine: score every KB entry by counting matched keywords/phrases.
+  // Multi-word keywords score higher (more specific), and word-boundary matches are preferred over raw substring.
+  let best=null,bestScore=0;
+  for(const entry of AI_KB){
+    let score=0;
+    for(const kw of entry.k){
+      if(!kw)continue;
+      const words=kw.split(' ').length;
+      // exact phrase match (substring) — weight by word count for specificity
+      if(ql.includes(kw)){
+        score += words*2;
+      } else {
+        // partial: all words of a multi-word keyword present anywhere in query
+        const kwWords=kw.split(' ');
+        if(kwWords.length>1 && kwWords.every(w=>ql.includes(w))){
+          score += words;
+        }
+      }
+    }
+    if(score>bestScore){bestScore=score;best=entry;}
+  }
+  if(best && bestScore>0)return best.r;
+
+  if(FOOD_FALLBACK.test(ql))return"🥗 Healthy diet ke liye:\n\n• Din mein 3 main meals + 2 snacks\n• Har meal mein protein shamil karein\n• Bahut saari vegetables aur fruits khayein\n• Refined sugar aur fried food kam karein\n• Pani khub piyein — din mein 8–10 glass\n\nKoi specific diet question hai? Batayein! 😊";
+  if(EXERCISE_FALLBACK.test(ql))return"💪 Exercise ke liye basic advice:\n\n• Roz 30 min walk sab se achha shuru\n• Week mein 3 din strength training\n• Proper warmup aur cooldown zaroori hai\n• Consistency most important hai\n\nKoi specific exercise problem hai? Puchein! 🏃";
+  if(YOGA_FALLBACK.test(ql))return"🧘 Yoga aur meditation ke fayde:\n\n• Stress aur anxiety kam hoti hai\n• Flexibility aur balance improve hoti hai\n• Sleep better aati hai\n• Blood pressure control mein rehta hai\n\nHamara Yoga section mein 7 poses hain step-by-step instructions ke saath! ✨";
+
+  return"Yeh sawaal mere knowledge base mein clearly match nahi hua. 🤔\n\nLekin main in topics mein detail se help kar sakta hoon:\n• Diet, weight loss/gain, protein\n• Exercise aur yoga\n• Sleep, stress, mental wellness\n• Diabetes, thyroid, heart, BP, joint pain\n• Skin, hair, eye care\n• Pregnancy, child nutrition, PCOS\n• Digestion, immunity, vitamin deficiency\n\nThoda specific karke poochein, jaise 'weight loss diet plan' ya 'yoga for back pain'. 😊\n\n⚠️ Serious medical issues ke liye please qualified doctor se milein.";
 }
 
 function renderChat(){
@@ -1112,8 +1163,16 @@ function renderChat(){
 }
 function sendChat(){
   const input=document.getElementById('chatInput');const q=input.value.trim();if(!q)return;
-  input.value='';chatHistory.push({role:'user',text:q});chatHistory.push({role:'bot',text:'...'});renderChat();
-  setTimeout(()=>{chatHistory.pop();chatHistory.push({role:'bot',text:getAIResponse(q)});renderChat();},500);
+  input.value='';chatHistory.push({role:'user',text:q});
+  chatHistory.push({role:'bot',text:'<span class="typing-dots"><span></span><span></span><span></span></span>',typing:true});
+  renderChat();
+  const el=document.getElementById('chatMessages');
+  el.querySelector('.msg-bot:last-child').innerHTML='<span class="typing-dots"><span></span><span></span><span></span></span>';
+  setTimeout(()=>{
+    chatHistory.pop();
+    chatHistory.push({role:'bot',text:getAIResponse(q)});
+    renderChat();
+  },550);
 }
 function quickChat(q){document.getElementById('chatInput').value=q;sendChat();}
 
